@@ -1,21 +1,99 @@
-from . import constants
+from .constants import *
 import math
+import smbus
+import time
 
-class BME680(constants.BME680):
-    def __init__(self):
-        constants.BME680.__init__(self)
+class BME680(BME680Data):
+    def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, i2c_device=None):
+        BME680Data.__init__(self)
 
-    def init(self):
-        pass
+        self.i2c_addr = i2c_addr
+        self._i2c = i2c_device
+        if self._i2c is None:
+            self._i2c = smbus.SMBus(1)
+
+        self.chip_id = self._get_regs(CHIP_ID_ADDR, 1)
+        if self.chip_id != CHIP_ID:
+            raise RuntimeError("BME680 Not Found. Invalid CHIP ID: 0x{0:02x}".format(self.chip_id))
+
+        self.soft_reset()
+        self.set_power_mode(SLEEP_MODE)
+
+        self._get_calibration_data()
+
+        self.set_humidity_oversample(OS_2X)
+        self.set_pressure_oversample(OS_4X)
+        self.set_temperature_oversample(OS_8X)
+        self.set_filter(FILTER_SIZE_3)
+        self.set_gas_status(ENABLE_GAS_MEAS)
+
+        self.get_sensor_data()
 
     def soft_reset(self):
-        pass
+        self._set_regs(SOFT_RESET_ADDR, SOFT_RESET_CMD) 
+        time.sleep(RESET_PERIOD / 1000.0)
 
-    def set_sensor_mode(self):
-        pass
+    def set_humidity_oversample(self, value):
+        self.tph_settings.os_hum = value
+        temp = self._get_regs(CONF_OS_H_ADDR, 1)
+        temp &= ~OSH_MSK
+        temp |= value << OSH_POS
+        self._set_regs(CONF_OS_H_ADDR, temp)
 
-    def get_sensor_mode(self, mode):
-        pass
+    def set_pressure_oversample(self, value):
+        self.tph_settings.os_pres = value
+        temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        temp &= ~OSP_MSK
+        temp |= value << OSP_POS
+        self._set_regs(CONF_T_P_MODE_ADDR, temp)
+
+    def set_temperature_oversample(self, value):
+        self.tph_settings.os_temp = value
+        temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        temp &= ~OST_MSK
+        temp |= value << OST_POS
+        self._set_regs(CONF_T_P_MODE_ADDR, temp)
+
+    def set_filter(self, value):
+        self.tph_settings.filter = value
+        temp = self._get_regs(CONF_ODR_FILT_ADDR, 1)
+        temp &= ~FILTER_MSK
+        temp |= value << FILTER_POS
+        self._set_regs(CONF_ODR_FILT_ADDR, temp)
+
+    def set_gas_status(self, value):
+        temp = self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1)
+        temp &= ~RUN_GAS_MSK
+        temp |= (value << RUN_GAS_POS)
+        self.gas_settings.run_gas = value
+
+    def set_gas_heater_temperature(self, value):
+        self.gas_settings.heatr_temp = value
+        temp = self._calc_heater_resistance(self.gas_settings.heatr_temp)
+        self._set_regs(RES_HEAT0_ADDR, temp)
+
+    def set_gas_heater_duration(self, value):
+        self.gas_settings.heatr_dur = value
+        temp = self._calc_heater_duration(self.gas_settings.heatr_dur)
+        self._set_regs(GAS_WAIT0_ADDR, temp)
+
+    def set_power_mode(self, value, blocking=True):
+        if value not in (SLEEP_MODE, FORCED_MODE):
+            print("Power mode should be one of SLEEP_MODE or FORCED_MODE")
+
+        self.power_mode = value
+
+        temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        temp &= ~ MODE_MSK
+        temp |= self.power_mode
+        self._set_regs(CONF_T_P_MODE_ADDR, temp)
+
+        while blocking and self.get_power_mode() != self.power_mode:
+            time.sleep(POLL_PERIOD_MS / 1000.0)
+
+    def get_power_mode(self):
+        self.power_mode = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        return self.power_mode
 
     def set_profile_duration(self, duration):
         pass
@@ -23,19 +101,57 @@ class BME680(constants.BME680):
     def get_profile_duration(self):
         pass
 
-    def _get_sensor_data(self):
-        pass
+    def get_sensor_data(self):
+        self.set_power_mode(FORCED_MODE)
+        tries = 10
 
-    def _get_regs(self, addr, length):
-        pass
+        for x in range(10):
+            regs = self._get_regs(FIELD0_ADDR, FIELD_LENGTH)
+
+            self.data.status = regs[0] & NEW_DATA_MSK
+            self.data.gas_index = regs[0] & GAS_INDEX_MSK
+            self.data.meas_index = regs[1]
+
+            adc_pres = (regs[2] << 12) | (regs[3] << 4) | (regs[4] >> 4)
+            adc_temp = (regs[5] << 12) | (regs[6] << 4) | (regs[7] >> 4)
+            adc_hum = (regs[8] << 8) | regs[9]
+            adc_gas_res = (regs[13] << 2) | (regs[14] >> 6)
+            gas_range = regs[14] & GAS_RANGE_MSK
+
+            self.data.status |= regs[14] & GASM_VALID_MSK
+            self.data.status |= regs[14] & HEAT_STAB_MSK
+
+            if self.data.status & NEW_DATA_MSK:
+                self.data.temperature = self._calc_temperature(adc_temp)
+                self.ambient_temperature = self.data.temperature
+                self.data.pressure = self._calc_pressure(adc_pres)
+                self.data.humidity = self._calc_humidity(adc_hum)
+                self.data.gas_resistance = self._calc_gas_resistance(adc_gas_res, gas_range)
+                return True
+            else:
+                time.sleep(POLL_PERIOD_MS / 1000.0)
+
+        return False
+
+    def _set_regs(self, register, value):
+        if isinstance(value, int):
+            self._i2c.write_byte_data(self.i2c_addr, register, value)
+        else:
+            self._i2c.write_i2c_block_data(self.i2c_addr, register, value)
+
+    def _get_regs(self, register, length):
+        if length == 1:
+            return self._i2c.read_byte_data(self.i2c_addr, register)
+        else:
+            return self._i2c.read_i2c_block_data(self.i2c_addr, register, length)
 
     def _get_calibration_data(self):
-        calibration = self._get_regs(constants.COEFF_ADDR1, constants.COEFF_ADDR1_LEN)
-        calibration += self._get_regs(constants.COEFF_ADDR2, constants.COEFF_ADDR2_LEN)
+        calibration = self._get_regs(COEFF_ADDR1, COEFF_ADDR1_LEN)
+        calibration += self._get_regs(COEFF_ADDR2, COEFF_ADDR2_LEN)
 
-        heat_range = self._get_regs(constants.ADDR_RES_HEAT_RANGE_ADDR, 1)[0]
-        heat_value = self._get_regs(constants.ADDR_RES_HEAT_VAL_ADDR, 1)[0]
-        sw_error = self._get_regs(constants.ADDR_RANGE_SW_ERR_ADDR, 1)[0]
+        heat_range = self._get_regs(ADDR_RES_HEAT_RANGE_ADDR, 1)
+        heat_value = self._get_regs(ADDR_RES_HEAT_VAL_ADDR, 1)
+        sw_error = self._get_regs(ADDR_RANGE_SW_ERR_ADDR, 1)
 
         self.calibration_data.set_from_array(calibration)
         self.calibration_data.set_other(heat_range, heat_value, sw_error)
@@ -94,9 +210,9 @@ class BME680(constants.BME680):
         return min(max(calc_hum,0),100000)
 
     def _calc_gas_resistance(self, gas_res_adc, gas_range):
-        var1 = ((1340 + (5 * self.calibration_data.range_sw_err)) * (constants.lookupTable1[gas_range])) / 65536
+        var1 = ((1340 + (5 * self.calibration_data.range_sw_err)) * (lookupTable1[gas_range])) / 65536
         var2 = (((gas_res_adc * 32768) - (16777216)) + var1)
-        var3 = ((constants.lookupTable2[gas_range] * var1) / 512)
+        var3 = ((lookupTable2[gas_range] * var1) / 512)
         calc_gas_res = ((var3 + (var2 / 2)) / var2)
 
         return calc_gas_res

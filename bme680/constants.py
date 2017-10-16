@@ -162,6 +162,7 @@ GAS_MEAS_POS = 4
 FILTER_POS = 2
 OST_POS = 5
 OSP_POS = 2
+OSH_POS = 0
 RUN_GAS_POS = 4
 
 # Array Index to Field data mapping for Calibration Data
@@ -347,7 +348,7 @@ class GasSettings:
 
 # BME680 device structure
 
-class BME680:
+class BME680Data:
     def __init__(self):
         # Chip Id
         self.chip_id = None
@@ -359,6 +360,8 @@ class BME680:
         self.mem_page = None
         # Ambient temperature in Degree C
         self.ambient_temperature = None
+        # Field Data
+        self.data = FieldData()
         # Sensor calibration data
         self.calibration_data = CalibrationData()
         # Sensor settings
@@ -369,13 +372,3 @@ class BME680:
         self.power_mode = None
         # New sensor fields
         self.new_fields = None
-        # Store the info messages
-        self.info_msg = None
-        # Burst read structure
-        self.read = None
-        # Burst write structure
-        self.write = None
-        # Delay in ms
-        self.delay_ms = None
-        # Communication function result
-        self.com_rslt = None
