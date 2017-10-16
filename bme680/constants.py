@@ -221,8 +221,16 @@ lookupTable2 = [4096000000, 2048000000, 1024000000, 512000000,
         16016016, 8000000, 4000000, 2000000,
         1000000, 500000, 250000, 125000]
 
-def bytes_to_word(msb, lsb):
-    return (msb << 8) | lsb
+def bytes_to_word(msb, lsb, bits=16, signed=False):
+    word = (msb << 8) | lsb
+    if signed:
+        word = twos_comp(word, bits)
+    return word
+
+def twos_comp(val, bits=16):
+    if val & (1 << (bits - 1)) != 0:
+        val = val - (1 << bits)
+    return val
 
 # Sensor field data structure
 
@@ -282,34 +290,34 @@ class CalibrationData:
     def set_from_array(self, calibration):
         # Temperature related coefficients
         self.par_t1 = bytes_to_word(calibration[T1_MSB_REG], calibration[T1_LSB_REG])
-        self.par_t2 = bytes_to_word(calibration[T2_MSB_REG], calibration[T2_LSB_REG])
-        self.par_t3 = calibration[T3_REG]
+        self.par_t2 = bytes_to_word(calibration[T2_MSB_REG], calibration[T2_LSB_REG], bits=16, signed=True)
+        self.par_t3 = twos_comp(calibration[T3_REG], bits=8)
 
         # Pressure related coefficients
         self.par_p1 = bytes_to_word(calibration[P1_MSB_REG], calibration[P1_LSB_REG])
-        self.par_p2 = bytes_to_word(calibration[P2_MSB_REG], calibration[P2_LSB_REG])
-        self.par_p3 = calibration[P3_REG]
-        self.par_p4 = bytes_to_word(calibration[P4_MSB_REG], calibration[P4_LSB_REG])
-        self.par_p5 = bytes_to_word(calibration[P5_MSB_REG], calibration[P5_LSB_REG])
-        self.par_p6 = calibration[P6_REG]
-        self.par_p7 = calibration[P7_REG]
-        self.par_p8 = bytes_to_word(calibration[P8_MSB_REG], calibration[P8_LSB_REG])
-        self.par_p9 = bytes_to_word(calibration[P9_MSB_REG], calibration[P9_LSB_REG])
+        self.par_p2 = bytes_to_word(calibration[P2_MSB_REG], calibration[P2_LSB_REG], bits=16, signed=True)
+        self.par_p3 = twos_comp(calibration[P3_REG], bits=8)
+        self.par_p4 = bytes_to_word(calibration[P4_MSB_REG], calibration[P4_LSB_REG], bits=16, signed=True)
+        self.par_p5 = bytes_to_word(calibration[P5_MSB_REG], calibration[P5_LSB_REG], bits=16, signed=True)
+        self.par_p6 = twos_comp(calibration[P6_REG], bits=8)
+        self.par_p7 = twos_comp(calibration[P7_REG], bits=8)
+        self.par_p8 = bytes_to_word(calibration[P8_MSB_REG], calibration[P8_LSB_REG], bits=16, signed=True)
+        self.par_p9 = bytes_to_word(calibration[P9_MSB_REG], calibration[P9_LSB_REG], bits=16, signed=True)
         self.par_p10 = calibration[P10_REG]
 
         # Humidity related coefficients
         self.par_h1 = (calibration[H1_MSB_REG] << HUM_REG_SHIFT_VAL) | (calibration[H1_LSB_REG] & BIT_H1_DATA_MSK)
         self.par_h2 = (calibration[H2_MSB_REG] << HUM_REG_SHIFT_VAL) | (calibration[H2_LSB_REG] >> HUM_REG_SHIFT_VAL)
-        self.par_h3 = calibration[H3_REG]
-        self.par_h4 = calibration[H4_REG]
-        self.par_h5 = calibration[H5_REG]
+        self.par_h3 = twos_comp(calibration[H3_REG], bits=8)
+        self.par_h4 = twos_comp(calibration[H4_REG], bits=8)
+        self.par_h5 = twos_comp(calibration[H5_REG], bits=8)
         self.par_h6 = calibration[H6_REG]
-        self.par_h7 = calibration[H7_REG]
+        self.par_h7 = twos_comp(calibration[H7_REG], bits=8)
 
         # Gas heater related coefficients
-        self.par_gh1 = calibration[GH1_REG]
-        self.par_gh2 = bytes_to_word(calibration[GH2_MSB_REG], calibration[GH2_LSB_REG])
-        self.par_gh3 = calibration[GH3_REG]
+        self.par_gh1 = twos_comp(calibration[GH1_REG], bits=8)
+        self.par_gh2 = bytes_to_word(calibration[GH2_MSB_REG], calibration[GH2_LSB_REG], bits=16, signed=True)
+        self.par_gh3 = twos_comp(calibration[GH3_REG], bits=8)
 
     def set_other(self, heat_range, heat_value, sw_error):
         self.res_heat_range = (heat_range & RHRANGE_MSK) / 16

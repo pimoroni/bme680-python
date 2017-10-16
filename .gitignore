@@ -1,1 +1,5 @@
 *.py[cod]
+*.o
+*.a
+*.so
+BME680_driver/main

@@ -150,8 +150,8 @@ class BME680(BME680Data):
         calibration += self._get_regs(COEFF_ADDR2, COEFF_ADDR2_LEN)
 
         heat_range = self._get_regs(ADDR_RES_HEAT_RANGE_ADDR, 1)
-        heat_value = self._get_regs(ADDR_RES_HEAT_VAL_ADDR, 1)
-        sw_error = self._get_regs(ADDR_RANGE_SW_ERR_ADDR, 1)
+        heat_value = twos_comp(self._get_regs(ADDR_RES_HEAT_VAL_ADDR, 1), bits=8)
+        sw_error = twos_comp(self._get_regs(ADDR_RANGE_SW_ERR_ADDR, 1), bits=8)
 
         self.calibration_data.set_from_array(calibration)
         self.calibration_data.set_other(heat_range, heat_value, sw_error)
