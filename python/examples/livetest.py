@@ -32,8 +32,6 @@ sensor.select_gas_heater_profile(0)
 # sensor.set_gas_heater_profile(200, 150, nb_profile=1)
 # sensor.select_gas_heater_profile(1)
 
-sensor.set_power_mode(bme680.FORCED_MODE)
-
 print("\n\nPolling:")
 try:
     while True:
@@ -45,8 +43,6 @@ try:
                 print("{0} {1} ohms".format(output, sensor.data.gas_resistance))
             else:
                 print(output)
-
-            sensor.set_power_mode(bme680.FORCED_MODE)
 
         time.sleep(1)
 
