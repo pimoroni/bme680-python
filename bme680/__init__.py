@@ -121,6 +121,8 @@ class BME680(BME680Data):
             self.data.status |= regs[14] & GASM_VALID_MSK
             self.data.status |= regs[14] & HEAT_STAB_MSK
 
+            self.data.heat_stable = (self.data.status & HEAT_STAB_MSK) > 0
+
             if self.data.status & NEW_DATA_MSK:
                 self.data.temperature = self._calc_temperature(adc_temp)
                 self.ambient_temperature = self.data.temperature

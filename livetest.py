@@ -30,10 +30,14 @@ try:
         sensor.set_power_mode(bme680.FORCED_MODE)
         sensor.get_sensor_data()
 
-        for name in dir(sensor.data):
-            value = getattr(sensor.data, name)
-            if not name.startswith('_'):
-                print("{}: {}".format(name, value))
+        if sensor.data.heat_stable:
+            print("{}".format(sensor.data.gas_resistance))
+
+        print("{}".format(sensor.data.temperature))
+        #for name in dir(sensor.data):
+        #    value = getattr(sensor.data, name)
+        #    if not name.startswith('_'):
+        #        print("{}: {}".format(name, value))
 
 except KeyboardInterrupt:
     pass
