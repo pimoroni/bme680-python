@@ -1,15 +1,23 @@
 from .constants import *
 import math
-import smbus
 import time
 
 class BME680(BME680Data):
+    """BOSCH BME680
+
+    Gas, pressure, temperature and humidity sensor.
+
+    :param i2c_addr: One of I2C_ADDR_PRIMARY (0x76) or I2C_ADDR_SECONDARY (0x77)
+    :param i2c_device: Optional smbus or compatible instance for facilitating i2c communications.
+
+    """
     def __init__(self, i2c_addr=I2C_ADDR_PRIMARY, i2c_device=None):
         BME680Data.__init__(self)
 
         self.i2c_addr = i2c_addr
         self._i2c = i2c_device
         if self._i2c is None:
+            import smbus
             self._i2c = smbus.SMBus(1)
 
         self.chip_id = self._get_regs(CHIP_ID_ADDR, 1)
@@ -47,81 +55,152 @@ class BME680(BME680Data):
         time.sleep(RESET_PERIOD / 1000.0)
 
     def set_humidity_oversample(self, value):
-        """Set humidity oversampling"""
+        """Set humidity oversampling
+        
+        A higher oversampling value means more stable sensor readings,
+        with less noise and jitter.
+
+        However each step of oversampling adds about 2ms to the latency,
+        causing a slower response time to fast transients.
+
+        :param value: Oversampling value, one of: OS_NONE, OS_1X, OS_2X, OS_4X, OS_8X, OS_16X
+
+        """
         self.tph_settings.os_hum = value
         self._set_bits(CONF_OS_H_ADDR, OSH_MSK, OSH_POS, value)
-        #temp = self._get_regs(CONF_OS_H_ADDR, 1)
-        #temp &= ~OSH_MSK
-        #temp |= value << OSH_POS
-        #self._set_regs(CONF_OS_H_ADDR, temp)
 
     def get_humidity_oversample(self):
         """Get humidity oversampling"""
         return (self._get_regs(CONF_OS_H_ADDR, 1) & OSH_MSK) >> OSH_POS
 
     def set_pressure_oversample(self, value):
-        """Set temperature oversampling"""
+        """Set temperature oversampling
+        
+        A higher oversampling value means more stable sensor readings,
+        with less noise and jitter.
+
+        However each step of oversampling adds about 2ms to the latency,
+        causing a slower response time to fast transients.
+
+        :param value: Oversampling value, one of: OS_NONE, OS_1X, OS_2X, OS_4X, OS_8X, OS_16X
+        
+        """
         self.tph_settings.os_pres = value
         self._set_bits(CONF_T_P_MODE_ADDR, OSP_MSK, OSP_POS, value)
-        #temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
-        #temp &= ~OSP_MSK
-        #temp |= value << OSP_POS
-        #self._set_regs(CONF_T_P_MODE_ADDR, temp)
 
     def get_pressure_oversample(self):
         """Get pressure oversampling"""
         return (self._get_regs(CONF_T_P_MODE_ADDR, 1) & OSP_MSK) >> OSP_POS
 
     def set_temperature_oversample(self, value):
-        """Set pressure oversampling"""
+        """Set pressure oversampling
+        
+        A higher oversampling value means more stable sensor readings,
+        with less noise and jitter.
+
+        However each step of oversampling adds about 2ms to the latency,
+        causing a slower response time to fast transients.
+
+        :param value: Oversampling value, one of: OS_NONE, OS_1X, OS_2X, OS_4X, OS_8X, OS_16X
+        
+        """
         self.tph_settings.os_temp = value
         self._set_bits(CONF_T_P_MODE_ADDR, OST_MSK, OST_POS, value)
-        #temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
-        #temp &= ~OST_MSK
-        #temp |= value << OST_POS
-        #self._set_regs(CONF_T_P_MODE_ADDR, temp)
 
     def get_temperature_oversample(self):
         """Get temperature oversampling"""
         return (self._get_regs(CONF_T_P_MODE_ADDR, 1) & OST_MSK) >> OST_POS
 
     def set_filter(self, value):
-        """Set filter size"""
+        """Set IIR filter size
+        
+        Optionally remove short term fluctuations from the temperature and pressure readings,
+        increasing their resolution but reducing their bandwidth.
+
+        Enabling the IIR filter does not slow down the time a reading takes, but will slow
+        down the BME680s response to changes in temperature and pressure.
+
+        When the IIR filter is enabled, the temperature and pressure resolution is effectively 20bit.
+        When it is disabled, it is 16bit + oversampling-1 bits.
+
+        """
         self.tph_settings.filter = value
         self._set_bits(CONF_ODR_FILT_ADDR, FILTER_MSK, FILTER_POS, value)
-        #temp = self._get_regs(CONF_ODR_FILT_ADDR, 1)
-        #temp &= ~FILTER_MSK
-        #temp |= value << FILTER_POS
-        #self._set_regs(CONF_ODR_FILT_ADDR, temp)
 
     def get_filter(self):
         """Get filter size"""
         return (self._get_regs(CONF_ODR_FILT_ADDR, 1) & FILTER_MSK) >> FILTER_POS
 
+    def select_gas_heater_profile(self, value):
+        """Set current gas sensor conversion profile: 0 to 9
+        
+        Select one of the 10 configured heating durations/set points.
+        
+        """
+        if value > NBCONV_MAX or value < NBCONV_MIN:
+            raise ValueError("Profile '{}' should be between {} and {}".format(value, NBCONV_MIN, NBCONV_MAX))
+
+        self.gas_settings.nb_conv = value
+        self._set_bits(CONF_ODR_RUN_GAS_NBC_ADDR, NBCONV_MSK, NBCONV_POS, value)
+
+    def get_gas_heater_profile(self):
+        """Get gas sensor conversion profile: 0 to 9"""
+        return self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1) & NBCONV_MSK
+
     def set_gas_status(self, value):
         """Enable/disable gas sensor"""
         self.gas_settings.run_gas = value
         self._set_bits(CONF_ODR_RUN_GAS_NBC_ADDR, RUN_GAS_MSK, RUN_GAS_POS, value)
-        #temp = self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1)
-        #temp &= ~RUN_GAS_MSK
-        #temp |= (value << RUN_GAS_POS)
-        #self._set_regs(CONF_ODR_RUN_GAS_NBC_ADDR, temp)
 
     def get_gas_status(self):
         """Get the current gas status"""
         return (self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1) & RUN_GAS_MSK) >> RUN_GAS_POS
 
-    def set_gas_heater_temperature(self, value):
-        """Set gas sensor heater temperature"""
+    def set_gas_heater_profile(self, temperature, duration, nb_profile=0):
+        """Set temperature and duration of gas sensor heater
+        
+        :param temperature: Target temperature in degrees celsius, between 200 and 400
+        :param durarion: Target duration in milliseconds, between 1 and 4032
+        :param nb_profile: Target profile, between 0 and 9
+
+        """
+        self.set_gas_heater_temperature(temperature, nb_profile=nb_profile)
+        self.set_gas_heater_duration(duration, nb_profile=nb_profile)
+
+    def set_gas_heater_temperature(self, value, nb_profile=0):
+        """Set gas sensor heater temperature
+
+        :param value: Target temperature in degrees celsius, between 200 and 400
+        
+        When setting an nb_profile other than 0,
+        make sure to select it with select_gas_heater_profile.
+
+        """
+        if nb_profile > NBCONV_MAX or value < NBCONV_MIN:
+            raise ValueError("Profile '{}' should be between {} and {}".format(nb_profile, NBCONV_MIN, NBCONV_MAX))
+
         self.gas_settings.heatr_temp = value
         temp = self._calc_heater_resistance(self.gas_settings.heatr_temp)
-        self._set_regs(RES_HEAT0_ADDR, temp)
+        self._set_regs(RES_HEAT0_ADDR + nb_profile, temp)
 
-    def set_gas_heater_duration(self, value):
-        """Set gas sensor heater duration"""
+    def set_gas_heater_duration(self, value, nb_profile=0):
+        """Set gas sensor heater duration
+
+        Heating durations between 1 ms and 4032 ms can be configured.
+        Approximately 20–30 ms are necessary for the heater to reach the intended target temperature.
+        
+        :param value: Heating duration in milliseconds.
+
+        When setting an nb_profile other than 0,
+        make sure to select it with select_gas_heater_profile.
+        
+        """
+        if nb_profile > NBCONV_MAX or value < NBCONV_MIN:
+            raise ValueError("Profile '{}' should be between {} and {}".format(nb_profile, NBCONV_MIN, NBCONV_MAX))
+
         self.gas_settings.heatr_dur = value
         temp = self._calc_heater_duration(self.gas_settings.heatr_dur)
-        self._set_regs(GAS_WAIT0_ADDR, temp)
+        self._set_regs(GAS_WAIT0_ADDR + nb_profile, temp)
 
     def set_power_mode(self, value, blocking=True):
         """Set power mode"""
@@ -131,10 +210,6 @@ class BME680(BME680Data):
         self.power_mode = value
 
         self._set_bits(CONF_T_P_MODE_ADDR, MODE_MSK, MODE_POS, value)
-        #temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
-        #temp &= ~ MODE_MSK
-        #temp |= self.power_mode
-        #self._set_regs(CONF_T_P_MODE_ADDR, temp)
 
         while blocking and self.get_power_mode() != self.power_mode:
             time.sleep(POLL_PERIOD_MS / 1000.0)
@@ -151,12 +226,12 @@ class BME680(BME680Data):
 
         """
         self.set_power_mode(FORCED_MODE)
-        tries = 10
 
-        for x in range(10):
+        for attempt in range(10):
             regs = self._get_regs(FIELD0_ADDR, FIELD_LENGTH)
 
             self.data.status = regs[0] & NEW_DATA_MSK
+            # Contains the nb_profile used to obtain the current measurement
             self.data.gas_index = regs[0] & GAS_INDEX_MSK
             self.data.meas_index = regs[1]
 

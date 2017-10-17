@@ -26,6 +26,12 @@ for name in dir(sensor.data):
 
 sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
+sensor.select_gas_heater_profile(0)
+
+# Up to 10 heater profiles can be configured, each
+# with their own temperature and duration.
+# sensor.set_gas_heater_profile(200, 150, nb_profile=1)
+# sensor.select_gas_heater_profile(1)
 
 try:
     while True:

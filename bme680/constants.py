@@ -133,7 +133,7 @@ GAS_SENSOR_SEL = GAS_MEAS_SEL | RUN_GAS_SEL | NBCONV_SEL
 
 # Number of conversion settings
 NBCONV_MIN = 0
-NBCONV_MAX = 10
+NBCONV_MAX = 9 # Was 10, but there are only 10 settings: 0 1 2 ... 8 9
 
 # Mask definitions
 GAS_MEAS_MSK = 0x30
@@ -165,6 +165,7 @@ OSP_POS = 2
 OSH_POS = 0
 RUN_GAS_POS = 4
 MODE_POS = 0
+NBCONV_POS = 0
 
 # Array Index to Field data mapping for Calibration Data
 T2_LSB_REG = 1
