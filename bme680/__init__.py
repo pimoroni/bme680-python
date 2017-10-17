@@ -29,80 +29,127 @@ class BME680(BME680Data):
 
         self.get_sensor_data()
 
+    def _get_calibration_data(self):
+        """Retrieves the sensor calibration data and stores it in .calibration_data"""
+        calibration = self._get_regs(COEFF_ADDR1, COEFF_ADDR1_LEN)
+        calibration += self._get_regs(COEFF_ADDR2, COEFF_ADDR2_LEN)
+
+        heat_range = self._get_regs(ADDR_RES_HEAT_RANGE_ADDR, 1)
+        heat_value = twos_comp(self._get_regs(ADDR_RES_HEAT_VAL_ADDR, 1), bits=8)
+        sw_error = twos_comp(self._get_regs(ADDR_RANGE_SW_ERR_ADDR, 1), bits=8)
+
+        self.calibration_data.set_from_array(calibration)
+        self.calibration_data.set_other(heat_range, heat_value, sw_error)
+
     def soft_reset(self):
+        """Initiate a soft reset"""
         self._set_regs(SOFT_RESET_ADDR, SOFT_RESET_CMD) 
         time.sleep(RESET_PERIOD / 1000.0)
 
     def set_humidity_oversample(self, value):
+        """Set humidity oversampling"""
         self.tph_settings.os_hum = value
-        temp = self._get_regs(CONF_OS_H_ADDR, 1)
-        temp &= ~OSH_MSK
-        temp |= value << OSH_POS
-        self._set_regs(CONF_OS_H_ADDR, temp)
+        self._set_bits(CONF_OS_H_ADDR, OSH_MSK, OSH_POS, value)
+        #temp = self._get_regs(CONF_OS_H_ADDR, 1)
+        #temp &= ~OSH_MSK
+        #temp |= value << OSH_POS
+        #self._set_regs(CONF_OS_H_ADDR, temp)
+
+    def get_humidity_oversample(self):
+        """Get humidity oversampling"""
+        return (self._get_regs(CONF_OS_H_ADDR, 1) & OSH_MSK) >> OSH_POS
 
     def set_pressure_oversample(self, value):
+        """Set temperature oversampling"""
         self.tph_settings.os_pres = value
-        temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
-        temp &= ~OSP_MSK
-        temp |= value << OSP_POS
-        self._set_regs(CONF_T_P_MODE_ADDR, temp)
+        self._set_bits(CONF_T_P_MODE_ADDR, OSP_MSK, OSP_POS, value)
+        #temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        #temp &= ~OSP_MSK
+        #temp |= value << OSP_POS
+        #self._set_regs(CONF_T_P_MODE_ADDR, temp)
+
+    def get_pressure_oversample(self):
+        """Get pressure oversampling"""
+        return (self._get_regs(CONF_T_P_MODE_ADDR, 1) & OSP_MSK) >> OSP_POS
 
     def set_temperature_oversample(self, value):
+        """Set pressure oversampling"""
         self.tph_settings.os_temp = value
-        temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
-        temp &= ~OST_MSK
-        temp |= value << OST_POS
-        self._set_regs(CONF_T_P_MODE_ADDR, temp)
+        self._set_bits(CONF_T_P_MODE_ADDR, OST_MSK, OST_POS, value)
+        #temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        #temp &= ~OST_MSK
+        #temp |= value << OST_POS
+        #self._set_regs(CONF_T_P_MODE_ADDR, temp)
+
+    def get_temperature_oversample(self):
+        """Get temperature oversampling"""
+        return (self._get_regs(CONF_T_P_MODE_ADDR, 1) & OST_MSK) >> OST_POS
 
     def set_filter(self, value):
+        """Set filter size"""
         self.tph_settings.filter = value
-        temp = self._get_regs(CONF_ODR_FILT_ADDR, 1)
-        temp &= ~FILTER_MSK
-        temp |= value << FILTER_POS
-        self._set_regs(CONF_ODR_FILT_ADDR, temp)
+        self._set_bits(CONF_ODR_FILT_ADDR, FILTER_MSK, FILTER_POS, value)
+        #temp = self._get_regs(CONF_ODR_FILT_ADDR, 1)
+        #temp &= ~FILTER_MSK
+        #temp |= value << FILTER_POS
+        #self._set_regs(CONF_ODR_FILT_ADDR, temp)
+
+    def get_filter(self):
+        """Get filter size"""
+        return (self._get_regs(CONF_ODR_FILT_ADDR, 1) & FILTER_MSK) >> FILTER_POS
 
     def set_gas_status(self, value):
-        temp = self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1)
-        temp &= ~RUN_GAS_MSK
-        temp |= (value << RUN_GAS_POS)
+        """Enable/disable gas sensor"""
         self.gas_settings.run_gas = value
-        self._set_regs(CONF_ODR_RUN_GAS_NBC_ADDR, temp)
+        self._set_bits(CONF_ODR_RUN_GAS_NBC_ADDR, RUN_GAS_MSK, RUN_GAS_POS, value)
+        #temp = self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1)
+        #temp &= ~RUN_GAS_MSK
+        #temp |= (value << RUN_GAS_POS)
+        #self._set_regs(CONF_ODR_RUN_GAS_NBC_ADDR, temp)
+
+    def get_gas_status(self):
+        """Get the current gas status"""
+        return (self._get_regs(CONF_ODR_RUN_GAS_NBC_ADDR, 1) & RUN_GAS_MSK) >> RUN_GAS_POS
 
     def set_gas_heater_temperature(self, value):
+        """Set gas sensor heater temperature"""
         self.gas_settings.heatr_temp = value
         temp = self._calc_heater_resistance(self.gas_settings.heatr_temp)
         self._set_regs(RES_HEAT0_ADDR, temp)
 
     def set_gas_heater_duration(self, value):
+        """Set gas sensor heater duration"""
         self.gas_settings.heatr_dur = value
         temp = self._calc_heater_duration(self.gas_settings.heatr_dur)
         self._set_regs(GAS_WAIT0_ADDR, temp)
 
     def set_power_mode(self, value, blocking=True):
+        """Set power mode"""
         if value not in (SLEEP_MODE, FORCED_MODE):
             print("Power mode should be one of SLEEP_MODE or FORCED_MODE")
 
         self.power_mode = value
 
-        temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
-        temp &= ~ MODE_MSK
-        temp |= self.power_mode
-        self._set_regs(CONF_T_P_MODE_ADDR, temp)
+        self._set_bits(CONF_T_P_MODE_ADDR, MODE_MSK, MODE_POS, value)
+        #temp = self._get_regs(CONF_T_P_MODE_ADDR, 1)
+        #temp &= ~ MODE_MSK
+        #temp |= self.power_mode
+        #self._set_regs(CONF_T_P_MODE_ADDR, temp)
 
         while blocking and self.get_power_mode() != self.power_mode:
             time.sleep(POLL_PERIOD_MS / 1000.0)
 
     def get_power_mode(self):
+        """Get power mode"""
         self.power_mode = self._get_regs(CONF_T_P_MODE_ADDR, 1)
         return self.power_mode
 
-    def set_profile_duration(self, duration):
-        pass
-
-    def get_profile_duration(self):
-        pass
-
     def get_sensor_data(self):
+        """Get sensor data.
+        
+        Stores data in .data and returns True upon success.
+
+        """
         self.set_power_mode(FORCED_MODE)
         tries = 10
 
@@ -138,28 +185,26 @@ class BME680(BME680Data):
 
         return False
 
+    def _set_bits(self, register, mask, position, value):
+        """Mask out and set one or more bits in a register"""
+        temp = self._get_regs(register, 1)
+        temp &= ~mask
+        temp |= value << position
+        self._set_regs(register, temp)
+
     def _set_regs(self, register, value):
+        """Set one or more registers"""
         if isinstance(value, int):
             self._i2c.write_byte_data(self.i2c_addr, register, value)
         else:
             self._i2c.write_i2c_block_data(self.i2c_addr, register, value)
 
     def _get_regs(self, register, length):
+        """Get one or more registers"""
         if length == 1:
             return self._i2c.read_byte_data(self.i2c_addr, register)
         else:
             return self._i2c.read_i2c_block_data(self.i2c_addr, register, length)
-
-    def _get_calibration_data(self):
-        calibration = self._get_regs(COEFF_ADDR1, COEFF_ADDR1_LEN)
-        calibration += self._get_regs(COEFF_ADDR2, COEFF_ADDR2_LEN)
-
-        heat_range = self._get_regs(ADDR_RES_HEAT_RANGE_ADDR, 1)
-        heat_value = twos_comp(self._get_regs(ADDR_RES_HEAT_VAL_ADDR, 1), bits=8)
-        sw_error = twos_comp(self._get_regs(ADDR_RANGE_SW_ERR_ADDR, 1), bits=8)
-
-        self.calibration_data.set_from_array(calibration)
-        self.calibration_data.set_other(heat_range, heat_value, sw_error)
         
     def _calc_temperature(self, temperature_adc):
         var1 = (temperature_adc / 8) - (self.calibration_data.par_t1 * 2)
@@ -233,7 +278,7 @@ class BME680(BME680Data):
         heatr_res_x100 = (((var4 / var5) - 250) * 34)
         heatr_res = ((heatr_res_x100 + 50) / 100)
 
-        return int(heatr_res)
+        return heatr_res
 
     def _calc_heater_duration(self, duration):
         if duration < 0xfc0:
