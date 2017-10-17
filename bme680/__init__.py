@@ -187,8 +187,8 @@ class BME680(BME680Data):
         """Set gas sensor heater duration
 
         Heating durations between 1 ms and 4032 ms can be configured.
-        Approximately 20–30 ms are necessary for the heater to reach the intended target temperature.
-        
+        Approximately 20-30 ms are necessary for the heater to reach the intended target temperature.
+
         :param value: Heating duration in milliseconds.
 
         When setting an nb_profile other than 0,
