@@ -256,7 +256,7 @@ class BME680(BME680Data):
             self.data.temperature = temperature / 100.0
             self.ambient_temperature = temperature # Saved for heater calc
 
-            self.data.pressure = self._calc_pressure(adc_pres) / 1000.0
+            self.data.pressure = self._calc_pressure(adc_pres) / 100.0
             self.data.humidity = self._calc_humidity(adc_hum) / 1000.0
             self.data.gas_resistance = self._calc_gas_resistance(adc_gas_res, gas_range)
             return True

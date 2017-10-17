@@ -3,6 +3,7 @@ import time
 
 sensor = bme680.BME680()
 
+print("Calibration data:")
 for name in dir(sensor.calibration_data):
     if not name.startswith('_'):
         value = getattr(sensor.calibration_data, name)
@@ -15,10 +16,8 @@ sensor.set_pressure_oversample(bme680.OS_4X)
 sensor.set_temperature_oversample(bme680.OS_8X)
 sensor.set_filter(bme680.FILTER_SIZE_3)
 sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
-sensor.set_power_mode(bme680.FORCED_MODE)
 
-sensor.get_sensor_data()
-
+print("\n\nInitial reading:")
 for name in dir(sensor.data):
     value = getattr(sensor.data, name)
     if not name.startswith('_'):
@@ -33,19 +32,22 @@ sensor.select_gas_heater_profile(0)
 # sensor.set_gas_heater_profile(200, 150, nb_profile=1)
 # sensor.select_gas_heater_profile(1)
 
+sensor.set_power_mode(bme680.FORCED_MODE)
+
+print("\n\nPolling:")
 try:
     while True:
-        sensor.set_power_mode(bme680.FORCED_MODE)
-        sensor.get_sensor_data()
+        if sensor.get_sensor_data():
 
-        if sensor.data.heat_stable:
-            print("{}".format(sensor.data.gas_resistance))
+            output = "{0:.2f} degC {1:.2f} hPa {2:.3f} %rH".format(sensor.data.temperature, sensor.data.pressure, sensor.data.humidity)
 
-        print("{} {} {}".format(sensor.data.temperature, sensor.data.pressure, sensor.data.humidity))
-        #for name in dir(sensor.data):
-        #    value = getattr(sensor.data, name)
-        #    if not name.startswith('_'):
-        #        print("{}: {}".format(name, value))
+            if sensor.data.heat_stable:
+                print("{0} {1} ohms".format(output, sensor.data.gas_resistance))
+            else:
+                print(output)
+
+            sensor.set_power_mode(bme680.FORCED_MODE)
+
         time.sleep(1)
 
 except KeyboardInterrupt:
