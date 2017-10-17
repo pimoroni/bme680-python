@@ -164,7 +164,7 @@ OST_POS = 5
 OSP_POS = 2
 OSH_POS = 0
 RUN_GAS_POS = 4
-MODE_MSK = 0
+MODE_POS = 0
 
 # Array Index to Field data mapping for Calibration Data
 T2_LSB_REG = 1
