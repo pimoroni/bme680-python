@@ -1,0 +1,29 @@
+Source: bme680
+Maintainer: Phil Howard <phil@pimoroni.com>
+Homepage: https://github.com/pimoroni/bme680
+Section: python
+Priority: extra
+Build-Depends: debhelper (>= 9.0.0), dh-python, python-all (>= 2.7), python-setuptools, python3-all (>= 3.4), python3-setuptools
+Standards-Version: 3.9.6
+X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.4
+
+Package: python-bme680
+Architecture: all
+Section: python
+Depends: ${misc:Depends}, ${python:Depends}, python-rpi.gpio, python-spidev
+Description: Python library for the BME680 gas, temperature, pressure and humidity sensor.
+ The BME680 is a gas, temperature, pressure and humidity sensor.
+ Supports communication over i2c only. 
+ .
+ This is the Python 2 version of the package.
+
+Package: python3-bme680
+Architecture: all
+Section: python
+Depends: ${misc:Depends}, ${python3:Depends}, python3-rpi.gpio, python3-spidev
+Description: Python library for the BME680 gas, temperature, pressure and humidity sensor.
+ The BME680 is a gas, temperature, pressure and humidity sensor.
+ Supports communication over i2c only. 
+ .
+ This is the Python 3 version of the package.
