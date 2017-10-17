@@ -66,6 +66,7 @@ class BME680(BME680Data):
         temp &= ~RUN_GAS_MSK
         temp |= (value << RUN_GAS_POS)
         self.gas_settings.run_gas = value
+        self._set_regs(CONF_ODR_RUN_GAS_NBC_ADDR, temp)
 
     def set_gas_heater_temperature(self, value):
         self.gas_settings.heatr_temp = value
@@ -124,10 +125,12 @@ class BME680(BME680Data):
             self.data.heat_stable = (self.data.status & HEAT_STAB_MSK) > 0
 
             if self.data.status & NEW_DATA_MSK:
-                self.data.temperature = self._calc_temperature(adc_temp)
-                self.ambient_temperature = self.data.temperature
-                self.data.pressure = self._calc_pressure(adc_pres)
-                self.data.humidity = self._calc_humidity(adc_hum)
+                temperature = self._calc_temperature(adc_temp)
+                self.data.temperature = temperature / 100.0
+                self.ambient_temperature = temperature # Saved for heater calc
+
+                self.data.pressure = self._calc_pressure(adc_pres) / 1000.0
+                self.data.humidity = self._calc_humidity(adc_hum) / 1000.0
                 self.data.gas_resistance = self._calc_gas_resistance(adc_gas_res, gas_range)
                 return True
             else:

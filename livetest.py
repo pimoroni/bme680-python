@@ -1,4 +1,5 @@
 import bme680
+import time
 
 sensor = bme680.BME680()
 
@@ -20,7 +21,8 @@ sensor.get_sensor_data()
 
 for name in dir(sensor.data):
     value = getattr(sensor.data, name)
-    print("{}: {}".format(name, value))
+    if not name.startswith('_'):
+        print("{}: {}".format(name, value))
 
 sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
@@ -33,11 +35,12 @@ try:
         if sensor.data.heat_stable:
             print("{}".format(sensor.data.gas_resistance))
 
-        print("{}".format(sensor.data.temperature))
+        print("{} {} {}".format(sensor.data.temperature, sensor.data.pressure, sensor.data.humidity))
         #for name in dir(sensor.data):
         #    value = getattr(sensor.data, name)
         #    if not name.startswith('_'):
         #        print("{}: {}".format(name, value))
+        time.sleep(1)
 
 except KeyboardInterrupt:
     pass
