@@ -48,6 +48,7 @@ setup(
     keywords        = 'Raspberry Pi',
     url             = 'http://www.pimoroni.com',
     classifiers     = classifiers,
-    py_modules      = ['bme680'],
+    packages        = ['bme680'],
+    py_modules      = [],
     install_requires= []
 )
