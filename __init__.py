@@ -182,7 +182,7 @@ class BME680(BME680Data):
             raise ValueError("Profile '{}' should be between {} and {}".format(nb_profile, NBCONV_MIN, NBCONV_MAX))
 
         self.gas_settings.heatr_temp = value
-        temp = self._calc_heater_resistance(self.gas_settings.heatr_temp)
+        temp = int(self._calc_heater_resistance(self.gas_settings.heatr_temp))
         self._set_regs(RES_HEAT0_ADDR + nb_profile, temp)
 
     def set_gas_heater_duration(self, value, nb_profile=0):
