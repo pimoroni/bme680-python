@@ -1,6 +1,6 @@
 # BME680
 
-[https://shop.pimoroni.com/products/bme680
+https://shop.pimoroni.com/products/bme680
 
 The state-of-the-art BME680 breakout lets you measure temperature, pressure, humidity, and indoor air quality.
 
