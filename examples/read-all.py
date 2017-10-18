@@ -5,13 +5,21 @@ import time
 
 sensor = bme680.BME680()
 
+# These calibration data can safely be commented
+# out, if desired.
+
 print("Calibration data:")
 for name in dir(sensor.calibration_data):
+
     if not name.startswith('_'):
         value = getattr(sensor.calibration_data, name)
+
         if isinstance(value, int):
             print("{}: {}".format(name, value))
 
+# These oversampling settings can be tweaked to 
+# change the balance between accuracy and noise in
+# the data.
 
 sensor.set_humidity_oversample(bme680.OS_2X)
 sensor.set_pressure_oversample(bme680.OS_4X)
@@ -22,6 +30,7 @@ sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
 print("\n\nInitial reading:")
 for name in dir(sensor.data):
     value = getattr(sensor.data, name)
+
     if not name.startswith('_'):
         print("{}: {}".format(name, value))
 
@@ -38,11 +47,11 @@ print("\n\nPolling:")
 try:
     while True:
         if sensor.get_sensor_data():
-
-            output = "{0:.2f} degC {1:.2f} hPa {2:.3f} %rH".format(sensor.data.temperature, sensor.data.pressure, sensor.data.humidity)
+            output = "{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH".format(sensor.data.temperature, sensor.data.pressure, sensor.data.humidity)
 
             if sensor.data.heat_stable:
-                print("{0} {1} ohms".format(output, sensor.data.gas_resistance))
+                print("{0},{1} Ohms".format(output, sensor.data.gas_resistance))
+
             else:
                 print(output)
 
@@ -50,4 +59,3 @@ try:
 
 except KeyboardInterrupt:
     pass
-
