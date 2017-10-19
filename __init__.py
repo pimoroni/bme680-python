@@ -2,7 +2,7 @@ from .constants import *
 import math
 import time
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 class BME680(BME680Data):
     """BOSCH BME680
