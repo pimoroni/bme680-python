@@ -8,7 +8,7 @@ The state-of-the-art BME680 breakout lets you measure temperature, pressure, hum
 
 ### Full install (recommended):
 
-We've created an easy installation script that will install all pre-requisites and get your Scroll pHAT HD
+We've created an easy installation script that will install all pre-requisites and get your BME680
 up and running with minimal efforts. To run it, fire up Terminal which you'll find in Menu -> Accessories -> Terminal
 on your Raspberry Pi desktop, as illustrated below:
 
