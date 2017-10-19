@@ -1,3 +1,8 @@
+1.0.2
+-----
+
+* Fixed set_gas_heater_temperature to avoid i2c TypeError
+
 1.0.1
 -----
 
