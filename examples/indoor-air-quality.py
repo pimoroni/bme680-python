@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import bme680
 import time
+import bme680
 
 print("""Estimate indoor air quality
 
@@ -15,7 +15,7 @@ Press Ctrl+C to exit
 
 sensor = bme680.BME680()
 
-# These oversampling settings can be tweaked to 
+# These oversampling settings can be tweaked to
 # change the balance between accuracy and noise in
 # the data.
 
@@ -29,7 +29,7 @@ sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
 sensor.select_gas_heater_profile(0)
 
-# start_time and curr_time ensure that the 
+# start_time and curr_time ensure that the
 # burn_in_time (in seconds) is kept track of.
 
 start_time = time.time()
@@ -56,11 +56,11 @@ try:
     # Set the humidity baseline to 40%, an optimal indoor humidity.
     hum_baseline = 40.0
 
-    # This sets the balance between humidity and gas reading in the 
+    # This sets the balance between humidity and gas reading in the
     # calculation of air_quality_score (25:75, humidity:gas)
     hum_weighting = 0.25
 
-    print("Gas baseline: {0} Ohms, humidity baseline: {1:.2f} %RH\n".format(gas_baseline, hum_baseline))
+    print("Gas baseline: {0} Ohms, humidity baseline: {1:.2f}% RH\n".format(gas_baseline, hum_baseline))
 
     while True:
         if sensor.get_sensor_data() and sensor.data.heat_stable:
@@ -84,10 +84,24 @@ try:
             else:
                 gas_score = 100 - (hum_weighting * 100)
 
-            # Calculate air_quality_score. 
+            # Calculate air_quality_score.
             air_quality_score = hum_score + gas_score
 
-            print("Gas: {0:.2f} Ohms,humidity: {1:.2f} %RH,air quality: {2:.2f}".format(gas, hum, air_quality_score))
+            if 0 <= air_quality_score <= 50:
+                iaq = 'good'
+            elif 51 <= air_quality_score <= 100:
+                iaq = 'average'
+            elif 101 <= air_quality_score <= 150:
+                iaq = 'little bad'
+            elif 151 <= air_quality_score <= 200:
+                iaq = 'bad'
+            elif 201 <= air_quality_score <= 300:
+                iaq = 'worse'
+            elif 301 <= air_quality_score <= 500:
+                iaq = 'very bad'
+
+            print("Gas: {0:.2f} Ohms, Humidity: {1:.2f}% RH, Air quality: {2:.2f} ({3:})".format(gas, hum, air_quality_score, iaq))
+
             time.sleep(1)
 
 except KeyboardInterrupt:
