@@ -287,63 +287,72 @@ class BME680(BME680Data):
             return self._i2c.read_i2c_block_data(self.i2c_addr, register, length)
         
     def _calc_temperature(self, temperature_adc):
-        var1 = (temperature_adc / 8) - (self.calibration_data.par_t1 * 2)
-        var2 = (var1 * self.calibration_data.par_t2) / 2048
-        var3 = ((var1 / 2) * (var1 / 2)) / 4096
-        var3 = ((var3) * (self.calibration_data.par_t3 * 16)) / 16384
+        var1 = (temperature_adc >> 3) - (self.calibration_data.par_t1 << 1)
+        var2 = (var1 * self.calibration_data.par_t2) >> 11
+        var3 = ((var1 >> 1) * (var1 >> 1)) >> 12
+        var3 = ((var3) * (self.calibration_data.par_t3 << 4)) >> 14
 
         # Save teperature data for pressure calculations
         self.calibration_data.t_fine = (var2 + var3)
-        calc_temp = (((self.calibration_data.t_fine * 5) + 128) / 256)
+        calc_temp = (((self.calibration_data.t_fine * 5) + 128) >> 8)
 
         return calc_temp
 
     def _calc_pressure(self, pressure_adc):
-        var1 = (self.calibration_data.t_fine / 2) - 64000
-        var2 = ((var1 / 4) * (var1 / 4)) / 2048
-        var2 = (var2 * self.calibration_data.par_p6) / 4
-        var2 = var2 + ((var1 * self.calibration_data.par_p5) * 2)
-        var2 = (var2 / 4) + (self.calibration_data.par_p4 * 65536)
-        
-        var1 = ((var1 / 4) * (var1 / 4)) / 8192
-        var1 = ((var1 * (self.calibration_data.par_p3 * 32)) / 8) + ((self.calibration_data.par_p2 * var1) / 2)
-        var1 = var1 / 262144
-        var1 = ((32768 + var1) * self.calibration_data.par_p1) / 32768
-        calc_pres = 1048576 - pressure_adc
-        calc_pres = (calc_pres - (var2 / 4096)) * 3125
-        calc_pres = (calc_pres / var1) * 2
-        var1 = (self.calibration_data.par_p9 * (((calc_pres / 8) * (calc_pres / 8)) / 8192)) / 4096
-        var2 = ((calc_pres / 4) * self.calibration_data.par_p8) / 8192
-        var3 = ((calc_pres / 256)
-                * (calc_pres / 256)
-                * (calc_pres / 256)
-                * self.calibration_data.par_p10) / 131072
-        calc_pres = calc_pres + ((var1 + var2 + var3 + (self.calibration_data.par_p7 * 128)) / 16)
+        var1 = ((self.calibration_data.t_fine) >> 1) - 64000
+        var2 = ((((var1 >> 2) * (var1 >> 2)) >> 11) *
+            self.calibration_data.par_p6) >> 2
+        var2 = var2 + ((var1 * self.calibration_data.par_p5) << 1)
+        var2 = (var2 >> 2) + (self.calibration_data.par_p4 << 16)
 
-        return calc_pres
+        var1 = ((var1 >> 2) * (var1 >> 2)) >> 13
+        var1 = ((var1 * (self.calibration_data.par_p3 << 5)) >> 3) + ((self.calibration_data.par_p2 * var1) >> 1)
+        var1 = var1 >> 18
+
+        var1 = ((32768 + var1) * self.calibration_data.par_p1) >> 15
+        calc_pressure = 1048576 - pressure_adc
+        calc_pressure = ((calc_pressure - (var2 >> 12)) * (3125))
+
+        if calc_pressure >= (1 << 31):
+            calc_pressure = ((calc_pressure / var1) << 1)
+        else:
+            calc_pressure = ((calc_pressure << 1) / var1)
+
+        var1 = (self.calibration_data.par_p9 * (((calc_pressure >> 3) *
+            (calc_pressure >> 3)) >> 13)) >> 12
+        var2 = ((calc_pressure >> 2) *
+            self.calibration_data.par_p8) >> 13
+        var3 = ((calc_pressure >> 8) * (calc_pressure >> 8) *
+            (calc_pressure >> 8) *
+            self.calibration_data.par_p10) >> 17
+
+        calc_pressure = (calc_pressure) + ((var1 + var2 + var3 +
+            (self.calibration_data.par_p7 << 7)) >> 4)
+
+        return calc_pressure
 
     def _calc_humidity(self, humidity_adc):
-        temp_scaled = ((self.calibration_data.t_fine * 5) + 128) / 256
+        temp_scaled = ((self.calibration_data.t_fine * 5) + 128) >> 8
         var1 = (humidity_adc - ((self.calibration_data.par_h1 * 16))) \
-                - (((temp_scaled * self.calibration_data.par_h3) / (100)) / 2)
+                - (((temp_scaled * self.calibration_data.par_h3) / (100)) >> 1)
         var2 = (self.calibration_data.par_h2
                 * (((temp_scaled * self.calibration_data.par_h4) / (100))
-                + (((temp_scaled * ((temp_scaled * self.calibration_data.par_h5) / (100))) / 64)
-                / (100)) + (1 * 16384))) / 1024
+                + (((temp_scaled * ((temp_scaled * self.calibration_data.par_h5) / (100))) >> 6)
+                / (100)) + (1 * 16384))) >> 10
         var3 = var1 * var2
-        var4 = self.calibration_data.par_h6 * 128
-        var4 = ((var4) + ((temp_scaled * self.calibration_data.par_h7) / (100))) / 16
-        var5 = ((var3 / 16384) * (var3 / 16384)) / 1024
-        var6 = (var4 * var5) / 2
-        calc_hum = (((var3 + var6) / 1024) * (1000)) / 4096
+        var4 = self.calibration_data.par_h6 << 7
+        var4 = ((var4) + ((temp_scaled * self.calibration_data.par_h7) / (100))) >> 4
+        var5 = ((var3 >> 14) * (var3 >> 14)) >> 10
+        var6 = (var4 * var5) >> 1
+        calc_hum = (((var3 + var6) >> 10) * (1000)) >> 12
 
         return min(max(calc_hum,0),100000)
 
     def _calc_gas_resistance(self, gas_res_adc, gas_range):
-        var1 = ((1340 + (5 * self.calibration_data.range_sw_err)) * (lookupTable1[gas_range])) / 65536
-        var2 = (((gas_res_adc * 32768) - (16777216)) + var1)
-        var3 = ((lookupTable2[gas_range] * var1) / 512)
-        calc_gas_res = ((var3 + (var2 / 2)) / var2)
+        var1 = ((1340 + (5 * self.calibration_data.range_sw_err)) * (lookupTable1[gas_range])) >> 16
+        var2 = (((gas_res_adc << 15) - (16777216)) + var1)
+        var3 = ((lookupTable2[gas_range] * var1) >> 9)
+        calc_gas_res = ((var3 + (var2 >> 1)) / var2)
 
         return calc_gas_res
 
