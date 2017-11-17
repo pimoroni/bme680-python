@@ -1,3 +1,10 @@
+1.0.3
+-----
+
+* Merged fixes from Bosch BME680_driver version 3.5.3
+* Replaced division with logical shift in compensation equations
+* Fixed bug in temperature compensation of pressure
+
 1.0.2
 -----
 
