@@ -314,9 +314,9 @@ class BME680(BME680Data):
         calc_pressure = ((calc_pressure - (var2 >> 12)) * (3125))
 
         if calc_pressure >= (1 << 31):
-            calc_pressure = ((calc_pressure / var1) << 1)
+            calc_pressure = ((calc_pressure // var1) << 1)
         else:
-            calc_pressure = ((calc_pressure << 1) / var1)
+            calc_pressure = ((calc_pressure << 1) // var1)
 
         var1 = (self.calibration_data.par_p9 * (((calc_pressure >> 3) *
             (calc_pressure >> 3)) >> 13)) >> 12
@@ -334,14 +334,14 @@ class BME680(BME680Data):
     def _calc_humidity(self, humidity_adc):
         temp_scaled = ((self.calibration_data.t_fine * 5) + 128) >> 8
         var1 = (humidity_adc - ((self.calibration_data.par_h1 * 16))) \
-                - (((temp_scaled * self.calibration_data.par_h3) / (100)) >> 1)
+                - (((temp_scaled * self.calibration_data.par_h3) // (100)) >> 1)
         var2 = (self.calibration_data.par_h2
-                * (((temp_scaled * self.calibration_data.par_h4) / (100))
-                + (((temp_scaled * ((temp_scaled * self.calibration_data.par_h5) / (100))) >> 6)
-                / (100)) + (1 * 16384))) >> 10
+                * (((temp_scaled * self.calibration_data.par_h4) // (100))
+                + (((temp_scaled * ((temp_scaled * self.calibration_data.par_h5) // (100))) >> 6)
+                // (100)) + (1 * 16384))) >> 10
         var3 = var1 * var2
         var4 = self.calibration_data.par_h6 << 7
-        var4 = ((var4) + ((temp_scaled * self.calibration_data.par_h7) / (100))) >> 4
+        var4 = ((var4) + ((temp_scaled * self.calibration_data.par_h7) // (100))) >> 4
         var5 = ((var3 >> 14) * (var3 >> 14)) >> 10
         var6 = (var4 * var5) >> 1
         calc_hum = (((var3 + var6) >> 10) * (1000)) >> 12
