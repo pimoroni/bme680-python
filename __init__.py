@@ -304,9 +304,9 @@ class BME680(BME680Data):
             self.calibration_data.par_p6) >> 2
         var2 = var2 + ((var1 * self.calibration_data.par_p5) << 1)
         var2 = (var2 >> 2) + (self.calibration_data.par_p4 << 16)
-
-        var1 = ((var1 >> 2) * (var1 >> 2)) >> 13
-        var1 = ((var1 * (self.calibration_data.par_p3 << 5)) >> 3) + ((self.calibration_data.par_p2 * var1) >> 1)
+        var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13 ) *
+                ((self.calibration_data.par_p3 << 5)) >> 3) +
+                ((self.calibration_data.par_p2 * var1) >> 1))
         var1 = var1 >> 18
 
         var1 = ((32768 + var1) * self.calibration_data.par_p1) >> 15
