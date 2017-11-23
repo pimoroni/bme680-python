@@ -1,3 +1,9 @@
+bme680 (1.0.3) stable; urgency=low
+
+  * Merged temperature compensation fix from Bosch's BME680_driver 3.5.3
+
+ -- Phil Howard <phil@pimoroni.com>  Wed, 22 Nov 2017 00:00:00 +0000
+
 bme680 (1.0.2) stable; urgency=low
 
   * Fixed set_gas_heater_temperature to avoid i2c TypeError

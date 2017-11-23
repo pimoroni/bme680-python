@@ -39,9 +39,10 @@ inform "seeded debian changelog"
 
 # generate pypi changelog
 
-sed -e "/--/d" -e "s/  \*/\*/" \
-    -e "s/.*\([0-9].[0-9].[0-9]\).*/\1/" \
-    -e '/[0-9].[0-9].[0-9]/ a\
+sed -e "/--/d" \
+    -e "s/  \*/\*/" \
+    -e "s/.*(\([0-9].[0-9].[0-9]\)).*/\1/" \
+    -e '/^[0-9].[0-9].[0-9]$/ a\
 -----' $mainlog | cat -s > $pypilog
 
 version=$(head -n 1 $pypilog)
