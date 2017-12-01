@@ -354,6 +354,9 @@ class BME680(BME680Data):
         var3 = ((lookupTable2[gas_range] * var1) >> 9)
         calc_gas_res = ((var3 + (var2 >> 1)) / var2)
 
+        if calc_gas_res < 0:
+            calc_gas_res = (1<<32) + calc_gas_res
+
         return calc_gas_res
 
     def _calc_heater_resistance(self, temperature):
