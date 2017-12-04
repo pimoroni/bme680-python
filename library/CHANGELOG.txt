@@ -1,3 +1,9 @@
+1.0.4
+-----
+
+* Fix to range_sw_err for extremely high gas readings
+* Convert to unsigned int to fix negative gas readings
+
 1.0.3
 -----
 
