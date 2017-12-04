@@ -325,7 +325,7 @@ class CalibrationData:
     def set_other(self, heat_range, heat_value, sw_error):
         self.res_heat_range = (heat_range & RHRANGE_MSK) // 16
         self.res_heat_val = heat_value
-        self.range_sw_err = (sw_error * RSERROR_MSK) // 16
+        self.range_sw_err = (sw_error & RSERROR_MSK) // 16
 
 # BME680 sensor settings structure which comprises of ODR,
 # over-sampling and filter settings.
