@@ -65,9 +65,9 @@ class BME680(BME680Data):
         if value == 0:
             self.offset_temp_in_t_fine = 0
         elif value < 0:
-            self.offset_temp_in_t_fine = -int((((abs(value) * 100) << 8) - 128) / 5)
+            self.offset_temp_in_t_fine = -int((((int(abs(value) * 100)) << 8) - 128) / 5)
         else:
-            self.offset_temp_in_t_fine = int((((abs(value) * 100) << 8) - 128) / 5)
+            self.offset_temp_in_t_fine = int((((int(abs(value) * 100)) << 8) - 128) / 5)
 
     def set_humidity_oversample(self, value):
         """Set humidity oversampling
