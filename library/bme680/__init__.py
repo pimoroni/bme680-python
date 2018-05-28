@@ -36,7 +36,7 @@ class BME680(BME680Data):
         self.set_temperature_oversample(OS_8X)
         self.set_filter(FILTER_SIZE_3)
         self.set_gas_status(ENABLE_GAS_MEAS)
-
+        self.set_temp_offset(0)
         self.get_sensor_data()
 
     def _get_calibration_data(self):
@@ -55,6 +55,19 @@ class BME680(BME680Data):
         """Initiate a soft reset"""
         self._set_regs(SOFT_RESET_ADDR, SOFT_RESET_CMD) 
         time.sleep(RESET_PERIOD / 1000.0)
+
+    def set_temp_offset(self, value):
+        """Set temperature offset in celsius
+
+        If set, the temperature t_fine will be increased by given value in celsius.
+        :param value: Temperature offset in Celsius, eg. 4, -8
+        """
+        if value == 0:
+            self.offset_temp_in_t_fine = 0
+        elif value < 0:
+            self.offset_temp_in_t_fine = -int((((abs(value) * 100) << 8) - 128) / 5)
+        else:
+            self.offset_temp_in_t_fine = int((((abs(value) * 100) << 8) - 128) / 5)
 
     def set_humidity_oversample(self, value):
         """Set humidity oversampling
@@ -293,7 +306,7 @@ class BME680(BME680Data):
         var3 = ((var3) * (self.calibration_data.par_t3 << 4)) >> 14
 
         # Save teperature data for pressure calculations
-        self.calibration_data.t_fine = (var2 + var3)
+        self.calibration_data.t_fine = (var2 + var3) + self.offset_temp_in_t_fine
         calc_temp = (((self.calibration_data.t_fine * 5) + 128) >> 8)
 
         return calc_temp
