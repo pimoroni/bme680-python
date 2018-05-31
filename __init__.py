@@ -60,14 +60,12 @@ class BME680(BME680Data):
         """Set temperature offset in celsius
 
         If set, the temperature t_fine will be increased by given value in celsius.
-        :param value: Temperature offset in Celsius, eg. 4, -8
+        :param value: Temperature offset in Celsius, eg. 4, -8, 1.25
         """
         if value == 0:
             self.offset_temp_in_t_fine = 0
         elif value < 0:
-            self.offset_temp_in_t_fine = -int((((int(abs(value) * 100)) << 8) - 128) / 5)
-        else:
-            self.offset_temp_in_t_fine = int((((int(abs(value) * 100)) << 8) - 128) / 5)
+            self.offset_temp_in_t_fine = int(math.copysign((((int(abs(value) * 100)) << 8) - 128) / 5, value))
 
     def set_humidity_oversample(self, value):
         """Set humidity oversampling
