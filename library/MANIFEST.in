@@ -2,4 +2,4 @@ include CHANGELOG.txt
 include LICENSE.txt
 include README.txt
 include setup.py
-include bme680.py
+recursive-include bme680 *.py
