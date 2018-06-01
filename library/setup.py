@@ -39,11 +39,11 @@ classifiers = ['Development Status :: 5 - Production/Stable',
 
 setup(
     name            = 'bme680',
-    version         = '1.0.4',
+    version         = '1.0.5',
     author          = 'Philip Howard',
     author_email    = 'phil@pimoroni.com',
     description     = """Python library for driving the Pimoroni BME680 Breakout""",
-    long_description= open('README.txt').read() + open('CHANGELOG.txt').read(),
+    long_description= open('README.rst').read() + "\n" + open('CHANGELOG.txt').read(),
     license         = 'MIT',
     keywords        = 'Raspberry Pi',
     url             = 'http://www.pimoroni.com',

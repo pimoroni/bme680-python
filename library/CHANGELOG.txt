@@ -1,3 +1,8 @@
+1.0.5
+-----
+
+* New: set_temp_offset to calibrate temperature offset in degrees C
+
 1.0.4
 -----
 
