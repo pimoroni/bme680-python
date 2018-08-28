@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import bme680
-import time
 
 print("""Display Temperature, Pressure and Humidity
 
@@ -33,4 +32,3 @@ try:
 
 except KeyboardInterrupt:
     pass
-

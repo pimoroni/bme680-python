@@ -17,7 +17,7 @@ for name in dir(sensor.calibration_data):
         if isinstance(value, int):
             print("{}: {}".format(name, value))
 
-# These oversampling settings can be tweaked to 
+# These oversampling settings can be tweaked to
 # change the balance between accuracy and noise in
 # the data.
 

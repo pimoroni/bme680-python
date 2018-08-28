@@ -4,6 +4,7 @@ import time
 
 __version__ = '1.0.5'
 
+
 class BME680(BME680Data):
     """BOSCH BME680
 
@@ -53,7 +54,7 @@ class BME680(BME680Data):
 
     def soft_reset(self):
         """Initiate a soft reset"""
-        self._set_regs(SOFT_RESET_ADDR, SOFT_RESET_CMD) 
+        self._set_regs(SOFT_RESET_ADDR, SOFT_RESET_CMD)
         time.sleep(RESET_PERIOD / 1000.0)
 
     def set_temp_offset(self, value):
@@ -69,7 +70,7 @@ class BME680(BME680Data):
 
     def set_humidity_oversample(self, value):
         """Set humidity oversampling
-        
+
         A higher oversampling value means more stable sensor readings,
         with less noise and jitter.
 
@@ -88,7 +89,7 @@ class BME680(BME680Data):
 
     def set_pressure_oversample(self, value):
         """Set temperature oversampling
-        
+
         A higher oversampling value means more stable sensor readings,
         with less noise and jitter.
 
@@ -96,7 +97,7 @@ class BME680(BME680Data):
         causing a slower response time to fast transients.
 
         :param value: Oversampling value, one of: OS_NONE, OS_1X, OS_2X, OS_4X, OS_8X, OS_16X
-        
+
         """
         self.tph_settings.os_pres = value
         self._set_bits(CONF_T_P_MODE_ADDR, OSP_MSK, OSP_POS, value)
@@ -107,7 +108,7 @@ class BME680(BME680Data):
 
     def set_temperature_oversample(self, value):
         """Set pressure oversampling
-        
+
         A higher oversampling value means more stable sensor readings,
         with less noise and jitter.
 
@@ -115,7 +116,7 @@ class BME680(BME680Data):
         causing a slower response time to fast transients.
 
         :param value: Oversampling value, one of: OS_NONE, OS_1X, OS_2X, OS_4X, OS_8X, OS_16X
-        
+
         """
         self.tph_settings.os_temp = value
         self._set_bits(CONF_T_P_MODE_ADDR, OST_MSK, OST_POS, value)
@@ -126,7 +127,7 @@ class BME680(BME680Data):
 
     def set_filter(self, value):
         """Set IIR filter size
-        
+
         Optionally remove short term fluctuations from the temperature and pressure readings,
         increasing their resolution but reducing their bandwidth.
 
@@ -146,9 +147,9 @@ class BME680(BME680Data):
 
     def select_gas_heater_profile(self, value):
         """Set current gas sensor conversion profile: 0 to 9
-        
+
         Select one of the 10 configured heating durations/set points.
-        
+
         """
         if value > NBCONV_MAX or value < NBCONV_MIN:
             raise ValueError("Profile '{}' should be between {} and {}".format(value, NBCONV_MIN, NBCONV_MAX))
@@ -171,7 +172,7 @@ class BME680(BME680Data):
 
     def set_gas_heater_profile(self, temperature, duration, nb_profile=0):
         """Set temperature and duration of gas sensor heater
-        
+
         :param temperature: Target temperature in degrees celsius, between 200 and 400
         :param durarion: Target duration in milliseconds, between 1 and 4032
         :param nb_profile: Target profile, between 0 and 9
@@ -184,7 +185,7 @@ class BME680(BME680Data):
         """Set gas sensor heater temperature
 
         :param value: Target temperature in degrees celsius, between 200 and 400
-        
+
         When setting an nb_profile other than 0,
         make sure to select it with select_gas_heater_profile.
 
@@ -206,7 +207,7 @@ class BME680(BME680Data):
 
         When setting an nb_profile other than 0,
         make sure to select it with select_gas_heater_profile.
-        
+
         """
         if nb_profile > NBCONV_MAX or value < NBCONV_MIN:
             raise ValueError("Profile '{}' should be between {} and {}".format(nb_profile, NBCONV_MIN, NBCONV_MAX))
@@ -234,7 +235,7 @@ class BME680(BME680Data):
 
     def get_sensor_data(self):
         """Get sensor data.
-        
+
         Stores data in .data and returns True upon success.
 
         """
@@ -267,7 +268,7 @@ class BME680(BME680Data):
 
             temperature = self._calc_temperature(adc_temp)
             self.data.temperature = temperature / 100.0
-            self.ambient_temperature = temperature # Saved for heater calc
+            self.ambient_temperature = temperature  # Saved for heater calc
 
             self.data.pressure = self._calc_pressure(adc_pres) / 100.0
             self.data.humidity = self._calc_humidity(adc_hum) / 1000.0
@@ -296,7 +297,7 @@ class BME680(BME680Data):
             return self._i2c.read_byte_data(self.i2c_addr, register)
         else:
             return self._i2c.read_i2c_block_data(self.i2c_addr, register, length)
-        
+
     def _calc_temperature(self, temperature_adc):
         var1 = (temperature_adc >> 3) - (self.calibration_data.par_t1 << 1)
         var2 = (var1 * self.calibration_data.par_t2) >> 11
@@ -312,10 +313,10 @@ class BME680(BME680Data):
     def _calc_pressure(self, pressure_adc):
         var1 = ((self.calibration_data.t_fine) >> 1) - 64000
         var2 = ((((var1 >> 2) * (var1 >> 2)) >> 11) *
-            self.calibration_data.par_p6) >> 2
+                self.calibration_data.par_p6) >> 2
         var2 = var2 + ((var1 * self.calibration_data.par_p5) << 1)
         var2 = (var2 >> 2) + (self.calibration_data.par_p4 << 16)
-        var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13 ) *
+        var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13) *
                 ((self.calibration_data.par_p3 << 5)) >> 3) +
                 ((self.calibration_data.par_p2 * var1) >> 1))
         var1 = var1 >> 18
@@ -330,26 +331,25 @@ class BME680(BME680Data):
             calc_pressure = ((calc_pressure << 1) // var1)
 
         var1 = (self.calibration_data.par_p9 * (((calc_pressure >> 3) *
-            (calc_pressure >> 3)) >> 13)) >> 12
+                (calc_pressure >> 3)) >> 13)) >> 12
         var2 = ((calc_pressure >> 2) *
-            self.calibration_data.par_p8) >> 13
+                self.calibration_data.par_p8) >> 13
         var3 = ((calc_pressure >> 8) * (calc_pressure >> 8) *
-            (calc_pressure >> 8) *
-            self.calibration_data.par_p10) >> 17
+                (calc_pressure >> 8) *
+                self.calibration_data.par_p10) >> 17
 
-        calc_pressure = (calc_pressure) + ((var1 + var2 + var3 +
-            (self.calibration_data.par_p7 << 7)) >> 4)
+        calc_pressure = calc_pressure + ((var1 + var2 + var3 + (self.calibration_data.par_p7 << 7)) >> 4)
 
         return calc_pressure
 
     def _calc_humidity(self, humidity_adc):
         temp_scaled = ((self.calibration_data.t_fine * 5) + 128) >> 8
         var1 = (humidity_adc - ((self.calibration_data.par_h1 * 16))) \
-                - (((temp_scaled * self.calibration_data.par_h3) // (100)) >> 1)
-        var2 = (self.calibration_data.par_h2
-                * (((temp_scaled * self.calibration_data.par_h4) // (100))
-                + (((temp_scaled * ((temp_scaled * self.calibration_data.par_h5) // (100))) >> 6)
-                // (100)) + (1 * 16384))) >> 10
+            - (((temp_scaled * self.calibration_data.par_h3) // (100)) >> 1)
+        var2 = (self.calibration_data.par_h2 *
+                (((temp_scaled * self.calibration_data.par_h4) // (100)) +
+                 (((temp_scaled * ((temp_scaled * self.calibration_data.par_h5) // (100))) >> 6) //
+                 (100)) + (1 * 16384))) >> 10
         var3 = var1 * var2
         var4 = self.calibration_data.par_h6 << 7
         var4 = ((var4) + ((temp_scaled * self.calibration_data.par_h7) // (100))) >> 4
@@ -357,7 +357,7 @@ class BME680(BME680Data):
         var6 = (var4 * var5) >> 1
         calc_hum = (((var3 + var6) >> 10) * (1000)) >> 12
 
-        return min(max(calc_hum,0),100000)
+        return min(max(calc_hum, 0), 100000)
 
     def _calc_gas_resistance(self, gas_res_adc, gas_range):
         var1 = ((1340 + (5 * self.calibration_data.range_sw_err)) * (lookupTable1[gas_range])) >> 16
@@ -366,12 +366,12 @@ class BME680(BME680Data):
         calc_gas_res = ((var3 + (var2 >> 1)) / var2)
 
         if calc_gas_res < 0:
-            calc_gas_res = (1<<32) + calc_gas_res
+            calc_gas_res = (1 << 32) + calc_gas_res
 
         return calc_gas_res
 
     def _calc_heater_resistance(self, temperature):
-        temperature = min(max(temperature,200),400)
+        temperature = min(max(temperature, 200), 400)
 
         var1 = ((self.ambient_temperature * self.calibration_data.par_gh3) / 1000) * 256
         var2 = (self.calibration_data.par_gh1 + 784) * (((((self.calibration_data.par_gh2 + 154009) * temperature * 5) / 100) + 3276800) / 10)
