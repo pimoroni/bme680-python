@@ -7,4 +7,4 @@ matrix:
 
 script:
         - pip install --ignore-installed --upgrade flake8
-        - flake8 --ignore F405
+        - flake8 --ignore F403,F405,E501
