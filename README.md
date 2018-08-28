@@ -1,5 +1,7 @@
 # BME680
 
+[![Build Status](https://travis-ci.org/pimoroni/bme680-python.svg?branch=master)](https://travis-ci.org/pimoroni/bme680-python)
+
 https://shop.pimoroni.com/products/bme680
 
 The state-of-the-art BME680 breakout lets you measure temperature, pressure, humidity, and indoor air quality.
