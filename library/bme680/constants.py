@@ -1,3 +1,5 @@
+"""BME680 constants, structures and utilities."""
+
 # BME680 General config
 POLL_PERIOD_MS = 10
 
@@ -118,7 +120,7 @@ TMP_BUFFER_LENGTH = 40
 REG_BUFFER_LENGTH = 6
 FIELD_DATA_LENGTH = 3
 GAS_REG_BUF_LENGTH = 20
-GAS_HEATER_PROF_LEN_MAX  = 10
+GAS_HEATER_PROF_LEN_MAX = 10
 
 # Settings selector
 OST_SEL = 1
@@ -133,7 +135,7 @@ GAS_SENSOR_SEL = GAS_MEAS_SEL | RUN_GAS_SEL | NBCONV_SEL
 
 # Number of conversion settings
 NBCONV_MIN = 0
-NBCONV_MAX = 9 # Was 10, but there are only 10 settings: 0 1 2 ... 8 9
+NBCONV_MAX = 9  # Was 10, but there are only 10 settings: 0 1 2 ... 8 9
 
 # Mask definitions
 GAS_MEAS_MSK = 0x30
@@ -214,30 +216,37 @@ REG_HCTRL_INDEX = 0
 
 # Look up tables for the possible gas range values
 lookupTable1 = [2147483647, 2147483647, 2147483647, 2147483647,
-        2147483647, 2126008810, 2147483647, 2130303777, 2147483647,
-        2147483647, 2143188679, 2136746228, 2147483647, 2126008810,
-        2147483647, 2147483647]
+                2147483647, 2126008810, 2147483647, 2130303777, 2147483647,
+                2147483647, 2143188679, 2136746228, 2147483647, 2126008810,
+                2147483647, 2147483647]
 
 lookupTable2 = [4096000000, 2048000000, 1024000000, 512000000,
-        255744255, 127110228, 64000000, 32258064,
-        16016016, 8000000, 4000000, 2000000,
-        1000000, 500000, 250000, 125000]
+                255744255, 127110228, 64000000, 32258064,
+                16016016, 8000000, 4000000, 2000000,
+                1000000, 500000, 250000, 125000]
+
 
 def bytes_to_word(msb, lsb, bits=16, signed=False):
+    """Convert a most and least significant byte into a word."""
+    # TODO: Reimpliment with struct
     word = (msb << 8) | lsb
     if signed:
         word = twos_comp(word, bits)
     return word
 
+
 def twos_comp(val, bits=16):
+    """Convert two bytes into a two's compliment signed word."""
+    # TODO: Reimpliment with struct
     if val & (1 << (bits - 1)) != 0:
         val = val - (1 << bits)
     return val
 
-# Sensor field data structure
 
 class FieldData:
-    def __init__(self):
+    """Structure for storing BME680 sensor data."""
+
+    def __init__(self):  # noqa D107
         # Contains new_data, gasm_valid & heat_stab
         self.status = None
         self.heat_stable = False
@@ -254,10 +263,11 @@ class FieldData:
         # Gas resistance in Ohms
         self.gas_resistance = None
 
-# Structure to hold the Calibration data
 
 class CalibrationData:
-    def __init__(self):
+    """Structure for storing BME680 calibration data."""
+
+    def __init__(self):  # noqa D107
         self.par_h1 = None
         self.par_h2 = None
         self.par_h3 = None
@@ -291,6 +301,7 @@ class CalibrationData:
         self.range_sw_err = None
 
     def set_from_array(self, calibration):
+        """Set paramaters from an array of bytes."""
         # Temperature related coefficients
         self.par_t1 = bytes_to_word(calibration[T1_MSB_REG], calibration[T1_LSB_REG])
         self.par_t2 = bytes_to_word(calibration[T2_MSB_REG], calibration[T2_LSB_REG], bits=16, signed=True)
@@ -323,15 +334,20 @@ class CalibrationData:
         self.par_gh3 = twos_comp(calibration[GH3_REG], bits=8)
 
     def set_other(self, heat_range, heat_value, sw_error):
+        """Set other values."""
         self.res_heat_range = (heat_range & RHRANGE_MSK) // 16
         self.res_heat_val = heat_value
         self.range_sw_err = (sw_error & RSERROR_MSK) // 16
 
-# BME680 sensor settings structure which comprises of ODR,
-# over-sampling and filter settings.
 
 class TPHSettings:
-    def __init__(self):
+    """Structure for storing BME680 sensor settings.
+
+    Comprises of output data rate, over-sampling and filter settings.
+
+    """
+
+    def __init__(self):  # noqa D107
         # Humidity oversampling
         self.os_hum = None
         # Temperature oversampling
@@ -341,11 +357,11 @@ class TPHSettings:
         # Filter coefficient
         self.filter = None
 
-# BME680 gas sensor which comprises of gas settings
-## and status parameters
 
 class GasSettings:
-    def __init__(self):
+    """Structure for storing BME680 gas settings and status."""
+
+    def __init__(self):  # noqa D107
         # Variable to store nb conversion
         self.nb_conv = None
         # Variable to store heater control
@@ -357,10 +373,11 @@ class GasSettings:
         # Pointer to store duration profile
         self.heatr_dur = None
 
-# BME680 device structure
 
 class BME680Data:
-    def __init__(self):
+    """Structure to represent BME680 device."""
+
+    def __init__(self):  # noqa D107
         # Chip Id
         self.chip_id = None
         # Device Id

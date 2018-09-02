@@ -19,3 +19,7 @@ library/debian/
 pip-log.txt
 pip-delete-this-directory.txt
 .DS_Store
+.vscode/
+.coverage
+.tox/
+.pytest_cache/
