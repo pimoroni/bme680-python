@@ -1,6 +1,9 @@
 # BME680
 
-[![Build Status](https://travis-ci.org/pimoroni/bme680-python.svg?branch=master)](https://travis-ci.org/pimoroni/bme680-python)
+[![Build Status](https://travis-ci.com/pimoroni/bme680-python.svg?branch=master)](https://travis-ci.com/pimoroni/bme680-python)
+[![Coverage Status](https://coveralls.io/repos/github/pimoroni/bme680-python/badge.svg?branch=master)](https://coveralls.io/github/pimoroni/bme680-python?branch=master)
+[![PyPi Package](https://img.shields.io/pypi/v/bme680.svg)](https://pypi.python.org/pypi/bme680)
+[![Python Versions](https://img.shields.io/pypi/pyversions/bme680.svg)](https://pypi.python.org/pypi/bme680)
 
 https://shop.pimoroni.com/products/bme680
 
