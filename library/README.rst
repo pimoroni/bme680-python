@@ -70,8 +70,8 @@ Documentation & Support
 -  Guides and tutorials - https://learn.pimoroni.com/bme680
 -  Get help - http://forums.pimoroni.com/c/support
 
-.. |Build Status| image:: https://travis-ci.com/pimoroni/bme680-python.svg?branch=master
-   :target: https://travis-ci.com/pimoroni/bme680-python
+.. |Build Status| image:: https://travis-ci.org/pimoroni/bme680-python.svg?branch=master
+   :target: https://travis-ci.org/pimoroni/bme680-python
 .. |Coverage Status| image:: https://coveralls.io/repos/github/pimoroni/bme680-python/badge.svg?branch=master
    :target: https://coveralls.io/github/pimoroni/bme680-python?branch=master
 .. |PyPi Package| image:: https://img.shields.io/pypi/v/bme680.svg
