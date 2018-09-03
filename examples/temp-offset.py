@@ -4,7 +4,10 @@ import bme680
 print("""Display Temperature, Pressure and Humidity with different offsets.
 """)
 
-sensor = bme680.BME680()
+try:
+    sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
+except IOError:
+    sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
 # These oversampling settings can be tweaked to
 # change the balance between accuracy and noise in
