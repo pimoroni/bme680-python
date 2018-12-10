@@ -10,10 +10,11 @@ __version__ = '1.0.5'
 
 # Export constants to global namespace
 # so end-users can "from BME680 import NAME"
-for key in constants.__dict__:
-    value = constants.__dict__[key]
-    if key not in globals():
-        globals()[key] = value
+if hasattr(constants, '__dict__'):
+    for key in constants.__dict__:
+        value = constants.__dict__[key]
+        if key not in globals():
+            globals()[key] = value
 
 
 class BME680(BME680Data):
