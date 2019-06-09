@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+
 import bme680
 import time
 
-print("""Estimate indoor air quality
+print("""indoor-air-quality.py - Estimates indoor air quality.
 
 Runs the sensor for a burn-in period, then uses a
 combination of relative humidity and gas resistance
 to estimate indoor air quality as a percentage.
 
-Press Ctrl+C to exit
+Press Ctrl+C to exit!
 
 """)
 

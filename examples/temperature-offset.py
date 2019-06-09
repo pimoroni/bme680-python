@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+
 import bme680
 
-print("""Display Temperature, Pressure and Humidity with different offsets.
+print("""temperature-offset.py - Displays temperature, pressure, and humidity with different offsets.
+
+Press Ctrl+C to exit!
+
 """)
 
 try:
@@ -18,7 +22,6 @@ sensor.set_pressure_oversample(bme680.OS_4X)
 sensor.set_temperature_oversample(bme680.OS_8X)
 sensor.set_filter(bme680.FILTER_SIZE_3)
 
-
 def display_data(offset=0):
     sensor.set_temp_offset(offset)
     sensor.get_sensor_data()
@@ -28,7 +31,6 @@ def display_data(offset=0):
         sensor.data.humidity)
     print(output)
     print('')
-
 
 print('Initial readings')
 display_data()
