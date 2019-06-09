@@ -1,10 +1,11 @@
 #!/usr/bin/env python
+
 import bme680
 import time
 
-print("""Display Temperature, Pressure, Humidity and Gas
+print("""read-all.py - Displays temperature, pressure, humidity, and gas.
 
-Press Ctrl+C to exit
+Press Ctrl+C to exit!
 
 """)
 

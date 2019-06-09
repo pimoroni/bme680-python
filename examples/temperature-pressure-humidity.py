@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+
 import bme680
 
-print("""Display Temperature, Pressure and Humidity
+print("""temperature-pressure-humidity.py - Displays temperature, pressure, and humidity.
 
 If you don't need gas readings, then you can read temperature,
 pressure and humidity quickly.
@@ -28,12 +29,10 @@ print('Polling:')
 try:
     while True:
         if sensor.get_sensor_data():
-
             output = '{0:.2f} C,{1:.2f} hPa,{2:.3f} %RH'.format(
                 sensor.data.temperature,
                 sensor.data.pressure,
                 sensor.data.humidity)
-
             print(output)
 
 except KeyboardInterrupt:
