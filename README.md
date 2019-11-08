@@ -52,5 +52,5 @@ In all cases you will have to enable the i2c bus.
 
 ## Documentation & Support
 
-* Guides and tutorials - https://learn.pimoroni.com/bme680
+* Guides and tutorials - https://learn.pimoroni.com/bme680-breakout
 * Get help - http://forums.pimoroni.com/c/support
