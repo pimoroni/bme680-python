@@ -4,10 +4,6 @@ import time
 import bme680
 from subprocess import PIPE, Popen
 
-try:
-    from smbus2 import SMBus
-except ImportError:
-    from smbus import SMBus
 
 print("""compensated-temperature.py - Use the CPU temperature to compensate temperature
 readings from the BME680 sensor. Method adapted from Initial State's Enviro pHAT
@@ -31,11 +27,13 @@ sensor.set_pressure_oversample(bme680.OS_4X)
 sensor.set_temperature_oversample(bme680.OS_8X)
 sensor.set_filter(bme680.FILTER_SIZE_3)
 
+
 # Gets the CPU temperature in degrees C
 def get_cpu_temperature():
     process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)
     output, _error = process.communicate()
     return float(output[output.index('=') + 1:output.rindex("'")])
+
 
 factor = 1.0  # Smaller numbers adjust temp down, vice versa
 smooth_size = 10  # Dampens jitter due to rapid CPU temp changes
