@@ -29,7 +29,7 @@ def test_calc_gas_resistance(smbus, calibration):
     """Validate gas calculation against mock calibration data."""
     sensor = bme680.BME680()
     sensor.calibration_data = calibration
-    assert sensor._calc_gas_resistance(0, 0) == 12946860
+    assert int(sensor._calc_gas_resistance(0, 0)) == 12946860
 
 
 def test_temp_offset(smbus, calibration):
