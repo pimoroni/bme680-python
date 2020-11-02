@@ -32,7 +32,7 @@ sensor.set_filter(bme680.FILTER_SIZE_3)
 def get_cpu_temperature():
     process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)
     output, _error = process.communicate()
-    return float(output[output.index('=') + 1:output.rindex("'")])
+    return float(output[output.index(b'=') + 1:output.rindex(b"'")])
 
 
 factor = 1.0  # Smaller numbers adjust temp down, vice versa
