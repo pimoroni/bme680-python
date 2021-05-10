@@ -42,9 +42,12 @@ class BME680(BME680Data):
             import smbus
             self._i2c = smbus.SMBus(1)
 
-        self.chip_id = self._get_regs(constants.CHIP_ID_ADDR, 1)
-        if self.chip_id != constants.CHIP_ID:
-            raise RuntimeError('BME680 Not Found. Invalid CHIP ID: 0x{0:02x}'.format(self.chip_id))
+        try:
+            self.chip_id = self._get_regs(constants.CHIP_ID_ADDR, 1)
+            if self.chip_id != constants.CHIP_ID:
+                raise RuntimeError('BME680 Not Found. Invalid CHIP ID: 0x{0:02x}'.format(self.chip_id))
+        except IOError:
+            raise RuntimeError("Unable to identify BME680 at 0x{:02x} (IOError)".format(self.i2c_addr))
 
         self.soft_reset()
         self.set_power_mode(constants.SLEEP_MODE)

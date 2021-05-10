@@ -11,7 +11,7 @@ Press Ctrl+C to exit!
 
 try:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
-except IOError:
+except (RuntimeError, IOError):
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
 # These calibration data can safely be commented
