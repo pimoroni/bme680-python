@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 """
-Copyright (c) 2016 Pimoroni.
+Copyright (c) 2016 Pimoroni
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,33 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, __version__
+from pkg_resources import parse_version
 
-classifiers = ['Development Status :: 5 - Production/Stable',
-               'Operating System :: POSIX :: Linux',
-               'License :: OSI Approved :: MIT License',
-               'Intended Audience :: Developers',
-               'Programming Language :: Python :: 2.6',
-               'Programming Language :: Python :: 2.7',
-               'Programming Language :: Python :: 3',
-               'Topic :: Software Development',
-               'Topic :: System :: Hardware']
+minimum_version = parse_version('30.4.0')
 
-setup(
-    name='bme680',
-    version='1.0.5',
-    author='Philip Howard',
-    author_email='phil@pimoroni.com',
-    description="""Python library for driving the Pimoroni BME680 Breakout""",
-    long_description=open('README.rst').read() + '\n' + open('CHANGELOG.txt').read(),
-    license='MIT',
-    keywords='Raspberry Pi',
-    url='http://www.pimoroni.com',
-    classifiers=classifiers,
-    packages=['bme680'],
-    py_modules=[],
-    install_requires=['smbus']  # preferably: install `python3-smbus` instead of relying on this
-)
+if parse_version(__version__) < minimum_version:
+    raise RuntimeError("Package setuptools must be at least version {}".format(minimum_version))
+
+setup()
