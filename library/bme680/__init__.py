@@ -183,6 +183,15 @@ class BME680(BME680Data):
         """Get gas sensor conversion profile: 0 to 9."""
         return self._get_regs(constants.CONF_ODR_RUN_GAS_NBC_ADDR, 1) & constants.NBCONV_MSK
 
+    def set_gas_heater_status(self, value):
+        """Enable/disable gas heater."""
+        self.gas_settings.heater = value
+        self._set_bits(constants.CONF_HEAT_CTRL_ADDR, constants.HCTRL_MSK, constants.HCTRL_POS, value)
+
+    def get_gas_heater_status(self):
+        """Get current heater status."""
+        return (self._get_regs(constants.CONF_HEAT_CTRL_ADDR, 1) & constants.HCTRL_MSK) >> constants.HCTRL_POS
+
     def set_gas_status(self, value):
         """Enable/disable gas sensor."""
         self.gas_settings.run_gas = value
