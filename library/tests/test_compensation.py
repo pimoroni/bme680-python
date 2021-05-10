@@ -25,11 +25,19 @@ def test_calc_humidity(smbus, calibration):
     assert sensor._calc_humidity(19019) == 42402
 
 
-def test_calc_gas_resistance(smbus, calibration):
+def test_calc_gas_resistance_low(smbus, calibration):
     """Validate gas calculation against mock calibration data."""
     sensor = bme680.BME680()
     sensor.calibration_data = calibration
     assert int(sensor._calc_gas_resistance(0, 0)) == 12946860
+
+
+def test_calc_gas_resistance_high(smbus, calibration):
+    """Validate gas calculation against mock calibration data."""
+    sensor = bme680.BME680()
+    sensor.calibration_data = calibration
+    sensor._variant = 1
+    assert int(sensor._calc_gas_resistance(0, 0)) == 102400000
 
 
 def test_temp_offset(smbus, calibration):
