@@ -121,6 +121,10 @@ HUM_REG_SHIFT_VAL = 4
 RUN_GAS_DISABLE = 0
 RUN_GAS_ENABLE = 1
 
+# Gas heater enable and disable settings
+GAS_HEAT_ENABLE = 0
+GAS_HEAT_DISABLE = 1
+
 # Buffer length macro declaration
 TMP_BUFFER_LENGTH = 40
 REG_BUFFER_LENGTH = 6
