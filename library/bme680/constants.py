@@ -16,7 +16,7 @@ COEFF_ADDR1_LEN = 25
 COEFF_ADDR2_LEN = 16
 
 # BME680 field_x related defines
-FIELD_LENGTH = 15
+FIELD_LENGTH = 17
 FIELD_ADDR_OFFSET = 17
 
 # Soft reset command
@@ -67,6 +67,10 @@ COEFF_ADDR2 = 0xe1
 
 # Chip identifier
 CHIP_ID_ADDR = 0xd0
+CHIP_VARIANT_ADDR = 0xf0
+
+VARIANT_LOW = 0x00
+VARIANT_HIGH = 0x01
 
 # Soft reset register
 SOFT_RESET_ADDR = 0xe0
@@ -77,7 +81,9 @@ DISABLE_HEATER = 0x08
 
 # Gas measurement settings
 DISABLE_GAS_MEAS = 0x00
-ENABLE_GAS_MEAS = 0x01
+ENABLE_GAS_MEAS = -1  # Now used as auto-select
+ENABLE_GAS_MEAS_LOW = 0x01
+ENABLE_GAS_MEAS_HIGH = 0x02
 
 # Over-sampling settings
 OS_NONE = 0
@@ -145,7 +151,7 @@ OST_MSK = 0XE0
 OSP_MSK = 0X1C
 OSH_MSK = 0X07
 HCTRL_MSK = 0x08
-RUN_GAS_MSK = 0x10
+RUN_GAS_MSK = 0x30
 MODE_MSK = 0x03
 RHRANGE_MSK = 0x30
 RSERROR_MSK = 0xf0

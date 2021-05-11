@@ -49,6 +49,8 @@ class BME680(BME680Data):
         except IOError:
             raise RuntimeError("Unable to identify BME680 at 0x{:02x} (IOError)".format(self.i2c_addr))
 
+        self._variant = self._get_regs(constants.CHIP_VARIANT_ADDR, 1)
+
         self.soft_reset()
         self.set_power_mode(constants.SLEEP_MODE)
 
@@ -58,7 +60,10 @@ class BME680(BME680Data):
         self.set_pressure_oversample(constants.OS_4X)
         self.set_temperature_oversample(constants.OS_8X)
         self.set_filter(constants.FILTER_SIZE_3)
-        self.set_gas_status(constants.ENABLE_GAS_MEAS)
+        if self._variant == constants.VARIANT_HIGH:
+            self.set_gas_status(constants.ENABLE_GAS_MEAS_HIGH)
+        else:
+            self.set_gas_status(constants.ENABLE_GAS_MEAS_LOW)
         self.set_temp_offset(0)
         self.get_sensor_data()
 
@@ -197,6 +202,11 @@ class BME680(BME680Data):
 
     def set_gas_status(self, value):
         """Enable/disable gas sensor."""
+        if value == -1:
+            if self._variant == constants.VARIANT_HIGH:
+                value = constants.ENABLE_GAS_MEAS_HIGH
+            else:
+                value = constants.ENABLE_GAS_MEAS_LOW
         self.gas_settings.run_gas = value
         self._set_bits(constants.CONF_ODR_RUN_GAS_NBC_ADDR, constants.RUN_GAS_MSK, constants.RUN_GAS_POS, value)
 
@@ -292,11 +302,17 @@ class BME680(BME680Data):
             adc_pres = (regs[2] << 12) | (regs[3] << 4) | (regs[4] >> 4)
             adc_temp = (regs[5] << 12) | (regs[6] << 4) | (regs[7] >> 4)
             adc_hum = (regs[8] << 8) | regs[9]
-            adc_gas_res = (regs[13] << 2) | (regs[14] >> 6)
-            gas_range = regs[14] & constants.GAS_RANGE_MSK
+            adc_gas_res_low = (regs[13] << 2) | (regs[14] >> 6)
+            adc_gas_res_high = (regs[15] << 2) | (regs[16] >> 6)
+            gas_range_l = regs[14] & constants.GAS_RANGE_MSK
+            gas_range_h = regs[16] & constants.GAS_RANGE_MSK
 
-            self.data.status |= regs[14] & constants.GASM_VALID_MSK
-            self.data.status |= regs[14] & constants.HEAT_STAB_MSK
+            if self._variant == constants.VARIANT_HIGH:
+                self.data.status |= regs[16] & constants.GASM_VALID_MSK
+                self.data.status |= regs[16] & constants.HEAT_STAB_MSK
+            else:
+                self.data.status |= regs[14] & constants.GASM_VALID_MSK
+                self.data.status |= regs[14] & constants.HEAT_STAB_MSK
 
             self.data.heat_stable = (self.data.status & constants.HEAT_STAB_MSK) > 0
 
@@ -306,7 +322,12 @@ class BME680(BME680Data):
 
             self.data.pressure = self._calc_pressure(adc_pres) / 100.0
             self.data.humidity = self._calc_humidity(adc_hum) / 1000.0
-            self.data.gas_resistance = self._calc_gas_resistance(adc_gas_res, gas_range)
+
+            if self._variant == constants.VARIANT_HIGH:
+                self.data.gas_resistance = self._calc_gas_resistance_high(adc_gas_res_high, gas_range_h)
+            else:
+                self.data.gas_resistance = self._calc_gas_resistance_low(adc_gas_res_low, gas_range_l)
+
             return True
 
         return False
@@ -399,6 +420,34 @@ class BME680(BME680Data):
 
     def _calc_gas_resistance(self, gas_res_adc, gas_range):
         """Convert the raw gas resistance using calibration data."""
+        if self._variant == constants.VARIANT_HIGH:
+            return self._calc_gas_resistance_high(gas_res_adc, gas_range)
+        else:
+            return self._calc_gas_resistance_low(gas_res_adc, gas_range)
+
+    def _calc_gas_resistance_high(self, gas_res_adc, gas_range):
+        """Convert the raw gas resistance using calibration data.
+
+        Applies to Variant ID == 0x01 only.
+
+        """
+        var1 = 262144 >> gas_range
+        var2 = gas_res_adc - 512
+
+        var2 *= 3
+        var2 = 4096 + var2
+
+        calc_gas_res = (10000 * var1) / var2
+        calc_gas_res *= 100
+
+        return calc_gas_res
+
+    def _calc_gas_resistance_low(self, gas_res_adc, gas_range):
+        """Convert the raw gas resistance using calibration data.
+
+        Applies to Variant ID == 0x00 only.
+
+        """
         var1 = ((1340 + (5 * self.calibration_data.range_sw_err)) * (lookupTable1[gas_range])) >> 16
         var2 = (((gas_res_adc << 15) - (16777216)) + var1)
         var3 = ((lookupTable2[gas_range] * var1) >> 9)
