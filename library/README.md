@@ -56,6 +56,18 @@ In all cases you will have to enable the i2c bus.
 * Get help - http://forums.pimoroni.com/c/support
 
 # Changelog
+1.1.1
+-----
+
+* New: constants to clarify heater on/off states
+
+1.1.0
+-----
+
+* New: support for BME688 "high" gas resistance variant
+* New: set/get gas heater disable bit
+* Enhancement: fail with descriptive RuntimeError when chip is not detected
+
 1.0.5
 -----
 

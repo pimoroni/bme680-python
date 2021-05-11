@@ -5,7 +5,7 @@ from . import constants
 import math
 import time
 
-__version__ = '1.0.5'
+__version__ = '1.1.1'
 
 
 # Export constants to global namespace
