@@ -1,5 +1,4 @@
 #!/bin/bash
-
 CONFIG=/boot/config.txt
 DATESTAMP=`date "+%Y-%m-%d-%H-%M-%S"`
 CONFIG_BACKUP=false
@@ -10,12 +9,15 @@ WD=`pwd`
 USAGE="sudo ./install.sh (--unstable)"
 POSITIONAL_ARGS=()
 UNSTABLE=false
+PYTHON="/usr/bin/python3"
 CODENAME=`lsb_release -sc`
 
-if [[ $CODENAME == "bullseye" ]]; then
-	bash ./install-bullseye.sh
-	exit $?
-fi
+distro_check() {
+	if [[ $CODENAME != "bullseye" ]]; then
+		printf "This installer is for Raspberry Pi OS: Bullseye only, current distro: $CODENAME\n"
+		exit 1
+	fi
+}
 
 user_check() {
 	if [ $(id -u) -ne 0 ]; then
@@ -105,6 +107,11 @@ while [[ $# -gt 0 ]]; do
 		UNSTABLE=true
 		shift
 		;;
+	-p|--python)
+		PYTHON=$2
+		shift
+		shift
+		;;
 	*)
 		if [[ $1 == -* ]]; then
 			printf "Unrecognised option: $1\n";
@@ -116,11 +123,21 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+distro_check
 user_check
 
-apt_pkg_install python-configparser
+if [ ! -f "$PYTHON" ]; then
+	printf "Python path $PYTHON not found!\n"
+	exit 1
+fi
 
-CONFIG_VARS=`python - <<EOF
+PYTHON_VER=`$PYTHON --version`
+
+inform "Installing. Please wait..."
+
+$PYTHON -m pip install --upgrade configparser
+
+CONFIG_VARS=`$PYTHON - <<EOF
 from configparser import ConfigParser
 c = ConfigParser()
 c.read('library/setup.cfg')
@@ -173,30 +190,16 @@ fi
 
 cd library
 
-printf "Installing for Python 2..\n"
-apt_pkg_install "${PY2_DEPS[@]}"
+printf "Installing for $PYTHON_VER...\n"
+apt_pkg_install "${PY3_DEPS[@]}"
 if $UNSTABLE; then
-	python setup.py install > /dev/null
+	$PYTHON setup.py install > /dev/null
 else
-	pip install --upgrade $LIBRARY_NAME
+	$PYTHON -m pip install --upgrade $LIBRARY_NAME
 fi
 if [ $? -eq 0 ]; then
 	success "Done!\n"
-	echo "pip uninstall $LIBRARY_NAME" >> $UNINSTALLER
-fi
-
-if [ -f "/usr/bin/python3" ]; then
-	printf "Installing for Python 3..\n"
-	apt_pkg_install "${PY3_DEPS[@]}"
-	if $UNSTABLE; then
-		python3 setup.py install > /dev/null
-	else
-		pip3 install --upgrade $LIBRARY_NAME
-	fi
-	if [ $? -eq 0 ]; then
-		success "Done!\n"
-		echo "pip3 uninstall $LIBRARY_NAME" >> $UNINSTALLER
-	fi
+	echo "$PYTHON -m pip uninstall $LIBRARY_NAME" >> $UNINSTALLER
 fi
 
 cd $WD
