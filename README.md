@@ -1,4 +1,4 @@
-# BME68x 
+# BME68x
 
 [![Build Status](https://travis-ci.org/pimoroni/bme680-python.svg?branch=master)](https://travis-ci.org/pimoroni/bme680-python)
 [![Coverage Status](https://coveralls.io/repos/github/pimoroni/bme680-python/badge.svg?branch=master)](https://coveralls.io/github/pimoroni/bme680-python?branch=master)
