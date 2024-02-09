@@ -39,8 +39,8 @@ class BME680(BME680Data):
         self.i2c_addr = i2c_addr
         self._i2c = i2c_device
         if self._i2c is None:
-            import smbus
-            self._i2c = smbus.SMBus(1)
+            import smbus2
+            self._i2c = smbus2.SMBus(1)
 
         try:
             self.chip_id = self._get_regs(constants.CHIP_ID_ADDR, 1)
