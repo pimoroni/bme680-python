@@ -1,7 +1,7 @@
 # BME680
 
-[![Build Status](https://travis-ci.org/pimoroni/bme680-python.svg?branch=master)](https://travis-ci.org/pimoroni/bme680-python)
-[![Coverage Status](https://coveralls.io/repos/github/pimoroni/bme680-python/badge.svg?branch=master)](https://coveralls.io/github/pimoroni/bme680-python?branch=master)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/bme680-python/test.yml?branch=main)](https://github.com/pimoroni/bme680-python/actions/workflows/test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/pimoroni/bme680-python/badge.svg?branch=main)](https://coveralls.io/github/pimoroni/bme680-python?branch=main)
 [![PyPi Package](https://img.shields.io/pypi/v/bme680.svg)](https://pypi.python.org/pypi/bme680)
 [![Python Versions](https://img.shields.io/pypi/pyversions/bme680.svg)](https://pypi.python.org/pypi/bme680)
 
@@ -22,33 +22,26 @@ on your Raspberry Pi desktop, as illustrated below:
 In the new terminal window type the command exactly as it appears below (check for typos) and follow the on-screen instructions:
 
 ```bash
-curl https://get.pimoroni.com/bme680 | bash
-```
-
-### Manual install:
-
-#### Library install for Python 3:
-
-```bash
-sudo pip3 install bme680
-```
-
-#### Library install for Python 2:
-
-```bash
-sudo pip2 install bme680
+git clone https://github.com/pimoroni/bme680-python
+cd bme680-python
+./install.sh
 ```
 
 ### Development:
 
-If you want to contribute, or like living on the edge of your seat by having the latest code, you should clone this repository, `cd` to the library directory, and run:
+If you want to contribute, or like living on the edge of your seat by having the latest code, you can install the development version like so:
 
 ```bash
-sudo python3 setup.py install
+git clone https://github.com/pimoroni/bme680-python
+cd bme680-python
+./install.sh --unstable
 ```
-(or `sudo python setup.py install` whichever your primary Python environment may be)
 
-In all cases you will have to enable the i2c bus.
+In all cases you will have to enable the i2c bus:
+
+```
+sudo raspi-config nonint do_i2c 0
+```
 
 ## Documentation & Support
 
