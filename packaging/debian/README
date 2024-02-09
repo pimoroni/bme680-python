@@ -1,9 +1,0 @@
-README
-
-Python library for the BME680 gas, temperature, pressure and humidity sensor. Supports communication over i2c only.  
-
-IMPORTANT
-
-The bme680 library requires i2c.
-To enable run `curl get.pimoroni.com/i2c | bash`
-or use raspi-config and reboot your Raspberry Pi.
