@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import bme680
 import time
+
+import bme680
 
 print("""indoor-air-quality.py - Estimates indoor air quality.
 

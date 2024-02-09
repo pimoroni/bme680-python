@@ -1,6 +1,8 @@
 import sys
+
 import mock
 import pytest
+
 import bme680
 from bme680.constants import CalibrationData
 
