@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import bme680
 import time
+
+import bme680
 
 print("""read-all.py - Displays temperature, pressure, humidity, and gas.
 

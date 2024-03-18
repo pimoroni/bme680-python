@@ -239,7 +239,7 @@ lookupTable2 = [4096000000, 2048000000, 1024000000, 512000000,
 
 def bytes_to_word(msb, lsb, bits=16, signed=False):
     """Convert a most and least significant byte into a word."""
-    # TODO: Reimpliment with struct
+    # TODO: Reimplement with struct
     word = (msb << 8) | lsb
     if signed:
         word = twos_comp(word, bits)
@@ -248,7 +248,7 @@ def bytes_to_word(msb, lsb, bits=16, signed=False):
 
 def twos_comp(val, bits=16):
     """Convert two bytes into a two's compliment signed word."""
-    # TODO: Reimpliment with struct
+    # TODO: Reimplement with struct
     if val & (1 << (bits - 1)) != 0:
         val = val - (1 << bits)
     return val
@@ -312,7 +312,7 @@ class CalibrationData:
         self.range_sw_err = None
 
     def set_from_array(self, calibration):
-        """Set paramaters from an array of bytes."""
+        """Set parameters from an array of bytes."""
         # Temperature related coefficients
         self.par_t1 = bytes_to_word(calibration[T1_MSB_REG], calibration[T1_LSB_REG])
         self.par_t2 = bytes_to_word(calibration[T2_MSB_REG], calibration[T2_LSB_REG], bits=16, signed=True)
