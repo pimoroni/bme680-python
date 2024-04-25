@@ -27,6 +27,12 @@ cd bme680-python
 ./install.sh
 ```
 
+**Note** Libraries will be installed in the "pimoroni" virtual environment, you will need to activate it to run examples:
+
+```
+source ~/.virtualenvs/pimoroni/bin/activate
+```
+
 ### Development:
 
 If you want to contribute, or like living on the edge of your seat by having the latest code, you can install the development version like so:
@@ -47,6 +53,4 @@ sudo raspi-config nonint do_i2c 0
 
 * Guides and tutorials - https://learn.pimoroni.com/bme680-breakout
 * Get help - http://forums.pimoroni.com/c/support
-
-
 
