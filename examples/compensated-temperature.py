@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import time
-import bme680
 from subprocess import PIPE, Popen
 
+import bme680
 
 print("""compensated-temperature.py - Use the CPU temperature to compensate temperature
 readings from the BME680 sensor. Method adapted from Initial State's Enviro pHAT

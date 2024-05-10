@@ -1,3 +1,10 @@
+2.0.0
+-----
+
+* Repackage to hatch/pyproject.toml
+* Drop Python 2.7 support
+* Switch from smbu2 to smbus2
+
 1.1.1
 -----
 

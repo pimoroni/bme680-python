@@ -1,6 +1,8 @@
 import sys
+
 import mock
 import pytest
+
 import bme680
 from bme680.constants import CalibrationData
 
@@ -46,9 +48,9 @@ def smbus_notpresent():
     """Mock smbus module."""
     smbus = mock.MagicMock()
     smbus.SMBus = MockSMBus
-    sys.modules['smbus'] = smbus
+    sys.modules['smbus2'] = smbus
     yield smbus
-    del sys.modules['smbus']
+    del sys.modules['smbus2']
 
 
 @pytest.fixture(scope='function', autouse=False)
@@ -56,9 +58,9 @@ def smbus():
     """Mock smbus module."""
     smbus = mock.MagicMock()
     smbus.SMBus = MockSMBusPresent
-    sys.modules['smbus'] = smbus
+    sys.modules['smbus2'] = smbus
     yield smbus
-    del sys.modules['smbus']
+    del sys.modules['smbus2']
 
 
 @pytest.fixture(scope='function', autouse=False)
