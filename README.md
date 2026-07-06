@@ -53,4 +53,3 @@ sudo raspi-config nonint do_i2c 0
 
 * Guides and tutorials - https://learn.pimoroni.com/bme680-breakout
 * Get help - http://forums.pimoroni.com/c/support
-

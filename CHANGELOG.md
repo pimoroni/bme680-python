@@ -47,4 +47,3 @@
 -----
 
 * Initial release
-
