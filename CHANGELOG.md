@@ -1,3 +1,10 @@
+2.0.1
+-----
+
+* New: data.gas_valid, exposing the sensor's gasm_valid status bit
+* Fix: get_power_mode now masks out the oversampling bits
+* Fix: set_power_mode's blocking wait had no effect
+
 2.0.0
 -----
 
@@ -47,4 +54,3 @@
 -----
 
 * Initial release
-
