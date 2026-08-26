@@ -261,6 +261,7 @@ class FieldData:
         # Contains new_data, gasm_valid & heat_stab
         self.status = None
         self.heat_stable = False
+        self.gas_valid = False
         # The index of the heater profile used
         self.gas_index = None
         # Measurement index to track order

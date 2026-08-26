@@ -315,6 +315,7 @@ class BME680(BME680Data):
                 self.data.status |= regs[14] & constants.HEAT_STAB_MSK
 
             self.data.heat_stable = (self.data.status & constants.HEAT_STAB_MSK) > 0
+            self.data.gas_valid = (self.data.status & constants.GASM_VALID_MSK) > 0
 
             temperature = self._calc_temperature(adc_temp)
             self.data.temperature = temperature / 100.0

@@ -1,6 +1,7 @@
 2.0.0
 -----
 
+* New: data.gas_valid, exposing the sensor's gasm_valid status bit
 * Repackage to hatch/pyproject.toml
 * Drop Python 2.7 support
 * Switch from smbu2 to smbus2
