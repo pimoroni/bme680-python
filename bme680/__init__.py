@@ -5,7 +5,7 @@ import time
 from . import constants
 from .constants import BME680Data, lookupTable1, lookupTable2
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 
 # Export constants to global namespace
