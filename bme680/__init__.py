@@ -276,12 +276,16 @@ class BME680(BME680Data):
 
         self._set_bits(constants.CONF_T_P_MODE_ADDR, constants.MODE_MSK, constants.MODE_POS, value)
 
-        while blocking and self.get_power_mode() != self.power_mode:
-            time.sleep(constants.POLL_PERIOD_MS / 1000.0)
+        # FORCED_MODE self-clears to SLEEP_MODE, so waiting to observe it can never terminate.
+        if blocking and value == constants.SLEEP_MODE:
+            for _ in range(10):
+                if self.get_power_mode() == value:
+                    break
+                time.sleep(constants.POLL_PERIOD_MS / 1000.0)
 
     def get_power_mode(self):
         """Get power mode."""
-        self.power_mode = self._get_regs(constants.CONF_T_P_MODE_ADDR, 1)
+        self.power_mode = (self._get_regs(constants.CONF_T_P_MODE_ADDR, 1) & constants.MODE_MSK) >> constants.MODE_POS
         return self.power_mode
 
     def get_sensor_data(self):
