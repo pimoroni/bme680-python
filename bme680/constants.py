@@ -257,7 +257,7 @@ def twos_comp(val, bits=16):
 class FieldData:
     """Structure for storing BME680 sensor data."""
 
-    def __init__(self):  # noqa D107
+    def __init__(self):
         # Contains new_data, gasm_valid & heat_stab
         self.status = None
         self.heat_stable = False
@@ -279,7 +279,7 @@ class FieldData:
 class CalibrationData:
     """Structure for storing BME680 calibration data."""
 
-    def __init__(self):  # noqa D107
+    def __init__(self):
         self.par_h1 = None
         self.par_h2 = None
         self.par_h3 = None
@@ -359,7 +359,7 @@ class TPHSettings:
 
     """
 
-    def __init__(self):  # noqa D107
+    def __init__(self):
         # Humidity oversampling
         self.os_hum = None
         # Temperature oversampling
@@ -373,7 +373,7 @@ class TPHSettings:
 class GasSettings:
     """Structure for storing BME680 gas settings and status."""
 
-    def __init__(self):  # noqa D107
+    def __init__(self):
         # Variable to store nb conversion
         self.nb_conv = None
         # Variable to store heater control
@@ -389,7 +389,7 @@ class GasSettings:
 class BME680Data:
     """Structure to represent BME680 device."""
 
-    def __init__(self):  # noqa D107
+    def __init__(self):
         # Chip Id
         self.chip_id = None
         # Device Id

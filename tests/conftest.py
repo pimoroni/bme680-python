@@ -1,6 +1,6 @@
 import sys
+from unittest import mock
 
-import mock
 import pytest
 
 import bme680
@@ -14,7 +14,7 @@ class MockSMBus:
 
     """
 
-    def __init__(self, bus):  # noqa D107
+    def __init__(self, bus):
         pass
 
     def read_byte_data(self, addr, register):

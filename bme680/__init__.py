@@ -45,9 +45,9 @@ class BME680(BME680Data):
         try:
             self.chip_id = self._get_regs(constants.CHIP_ID_ADDR, 1)
             if self.chip_id != constants.CHIP_ID:
-                raise RuntimeError('BME680 Not Found. Invalid CHIP ID: 0x{0:02x}'.format(self.chip_id))
-        except IOError:
-            raise RuntimeError("Unable to identify BME680 at 0x{:02x} (IOError)".format(self.i2c_addr))
+                raise RuntimeError(f'BME680 Not Found. Invalid CHIP ID: 0x{self.chip_id:02x}')
+        except OSError:
+            raise RuntimeError(f"Unable to identify BME680 at 0x{self.i2c_addr:02x} (IOError)") from None
 
         self._variant = self._get_regs(constants.CHIP_VARIANT_ADDR, 1)
 
@@ -182,7 +182,7 @@ class BME680(BME680Data):
 
         """
         if value > constants.NBCONV_MAX or value < constants.NBCONV_MIN:
-            raise ValueError("Profile '{}' should be between {} and {}".format(value, constants.NBCONV_MIN, constants.NBCONV_MAX))
+            raise ValueError(f"Profile '{value}' should be between {constants.NBCONV_MIN} and {constants.NBCONV_MAX}")
 
         self.gas_settings.nb_conv = value
         self._set_bits(constants.CONF_ODR_RUN_GAS_NBC_ADDR, constants.NBCONV_MSK, constants.NBCONV_POS, value)
@@ -203,10 +203,7 @@ class BME680(BME680Data):
     def set_gas_status(self, value):
         """Enable/disable gas sensor."""
         if value == -1:
-            if self._variant == constants.VARIANT_HIGH:
-                value = constants.ENABLE_GAS_MEAS_HIGH
-            else:
-                value = constants.ENABLE_GAS_MEAS_LOW
+            value = constants.ENABLE_GAS_MEAS_HIGH if self._variant == constants.VARIANT_HIGH else constants.ENABLE_GAS_MEAS_LOW
         self.gas_settings.run_gas = value
         self._set_bits(constants.CONF_ODR_RUN_GAS_NBC_ADDR, constants.RUN_GAS_MSK, constants.RUN_GAS_POS, value)
 
@@ -235,7 +232,7 @@ class BME680(BME680Data):
 
         """
         if nb_profile > constants.NBCONV_MAX or value < constants.NBCONV_MIN:
-            raise ValueError('Profile "{}" should be between {} and {}'.format(nb_profile, constants.NBCONV_MIN, constants.NBCONV_MAX))
+            raise ValueError(f'Profile "{nb_profile}" should be between {constants.NBCONV_MIN} and {constants.NBCONV_MAX}')
 
         self.gas_settings.heatr_temp = value
         temp = int(self._calc_heater_resistance(self.gas_settings.heatr_temp))
@@ -254,7 +251,7 @@ class BME680(BME680Data):
 
         """
         if nb_profile > constants.NBCONV_MAX or value < constants.NBCONV_MIN:
-            raise ValueError('Profile "{}" should be between {} and {}'.format(nb_profile, constants.NBCONV_MIN, constants.NBCONV_MAX))
+            raise ValueError(f'Profile "{nb_profile}" should be between {constants.NBCONV_MIN} and {constants.NBCONV_MAX}')
 
         self.gas_settings.heatr_dur = value
         temp = self._calc_heater_duration(self.gas_settings.heatr_dur)
@@ -296,7 +293,7 @@ class BME680(BME680Data):
         """
         self.set_power_mode(constants.FORCED_MODE)
 
-        for attempt in range(10):
+        for _attempt in range(10):
             status = self._get_regs(constants.FIELD0_ADDR, 1)
 
             if (status & constants.NEW_DATA_MSK) == 0:
@@ -394,10 +391,7 @@ class BME680(BME680Data):
         calc_pressure = 1048576 - pressure_adc
         calc_pressure = ((calc_pressure - (var2 >> 12)) * (3125))
 
-        if calc_pressure >= (1 << 31):
-            calc_pressure = ((calc_pressure // var1) << 1)
-        else:
-            calc_pressure = ((calc_pressure << 1) // var1)
+        calc_pressure = calc_pressure // var1 << 1 if calc_pressure >= 1 << 31 else (calc_pressure << 1) // var1
 
         var1 = (self.calibration_data.par_p9 * (((calc_pressure >> 3) *
                 (calc_pressure >> 3)) >> 13)) >> 12
@@ -415,7 +409,7 @@ class BME680(BME680Data):
     def _calc_humidity(self, humidity_adc):
         """Convert the raw humidity using calibration data."""
         temp_scaled = ((self.calibration_data.t_fine * 5) + 128) >> 8
-        var1 = (humidity_adc - ((self.calibration_data.par_h1 * 16))) -\
+        var1 = (humidity_adc - (self.calibration_data.par_h1 * 16)) -\
                (((temp_scaled * self.calibration_data.par_h3) // (100)) >> 1)
         var2 = (self.calibration_data.par_h2 *
                 (((temp_scaled * self.calibration_data.par_h4) // (100)) +
