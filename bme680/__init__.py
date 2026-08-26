@@ -261,7 +261,14 @@ class BME680(BME680Data):
         self._set_regs(constants.GAS_WAIT0_ADDR + nb_profile, temp)
 
     def set_power_mode(self, value, blocking=True):
-        """Set power mode."""
+        """Set power mode.
+
+        get_sensor_data sets FORCED_MODE to take a reading. Set SLEEP_MODE to
+        idle the sensor.
+
+        :param value: One of SLEEP_MODE or FORCED_MODE
+
+        """
         if value not in (constants.SLEEP_MODE, constants.FORCED_MODE):
             raise ValueError('Power mode should be one of SLEEP_MODE or FORCED_MODE')
 
