@@ -23,3 +23,5 @@ pip-delete-this-directory.txt
 .coverage
 .tox/
 .pytest_cache/
+.venv
+uv.lock

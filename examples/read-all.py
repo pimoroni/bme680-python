@@ -12,7 +12,7 @@ Press Ctrl+C to exit!
 
 try:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
-except (RuntimeError, IOError):
+except (OSError, RuntimeError):
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
 # These calibration data can safely be commented
@@ -25,7 +25,7 @@ for name in dir(sensor.calibration_data):
         value = getattr(sensor.calibration_data, name)
 
         if isinstance(value, int):
-            print('{}: {}'.format(name, value))
+            print(f'{name}: {value}')
 
 # These oversampling settings can be tweaked to
 # change the balance between accuracy and noise in
@@ -42,7 +42,7 @@ for name in dir(sensor.data):
     value = getattr(sensor.data, name)
 
     if not name.startswith('_'):
-        print('{}: {}'.format(name, value))
+        print(f'{name}: {value}')
 
 sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
@@ -57,15 +57,10 @@ print('\n\nPolling:')
 try:
     while True:
         if sensor.get_sensor_data():
-            output = '{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH'.format(
-                sensor.data.temperature,
-                sensor.data.pressure,
-                sensor.data.humidity)
+            output = f'{sensor.data.temperature:.2f} C,{sensor.data.pressure:.2f} hPa,{sensor.data.humidity:.2f} %RH'
 
             if sensor.data.heat_stable:
-                print('{0},{1} Ohms'.format(
-                    output,
-                    sensor.data.gas_resistance))
+                print(f'{output},{sensor.data.gas_resistance} Ohms')
 
             else:
                 print(output)

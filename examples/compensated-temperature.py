@@ -15,7 +15,7 @@ Press Ctrl+C to exit!
 
 try:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
-except (RuntimeError, IOError):
+except (OSError, RuntimeError):
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
 # These oversampling settings can be tweaked to
@@ -52,6 +52,6 @@ while True:
         raw_temp = sensor.data.temperature
         comp_temp = raw_temp - ((smoothed_cpu_temp - raw_temp) / factor)
 
-        print("Compensated temperature: {:05.2f} *C".format(comp_temp))
+        print(f"Compensated temperature: {comp_temp:05.2f} *C")
 
         time.sleep(1.0)

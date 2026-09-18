@@ -13,7 +13,7 @@ Press Ctrl+C to exit
 
 try:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
-except (RuntimeError, IOError):
+except (OSError, RuntimeError):
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
 # These oversampling settings can be tweaked to
@@ -29,10 +29,7 @@ print('Polling:')
 try:
     while True:
         if sensor.get_sensor_data():
-            output = '{0:.2f} C,{1:.2f} hPa,{2:.3f} %RH'.format(
-                sensor.data.temperature,
-                sensor.data.pressure,
-                sensor.data.humidity)
+            output = f'{sensor.data.temperature:.2f} C,{sensor.data.pressure:.2f} hPa,{sensor.data.humidity:.3f} %RH'
             print(output)
 
 except KeyboardInterrupt:

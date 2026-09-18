@@ -16,7 +16,7 @@ Press Ctrl+C to exit!
 
 try:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
-except (RuntimeError, IOError):
+except (OSError, RuntimeError):
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
 # These oversampling settings can be tweaked to
@@ -52,7 +52,7 @@ try:
         if sensor.get_sensor_data() and sensor.data.heat_stable:
             gas = sensor.data.gas_resistance
             burn_in_data.append(gas)
-            print('Gas: {0} Ohms'.format(gas))
+            print(f'Gas: {gas} Ohms')
             time.sleep(1)
 
     gas_baseline = sum(burn_in_data[-50:]) / 50.0
@@ -64,9 +64,7 @@ try:
     # calculation of air_quality_score (25:75, humidity:gas)
     hum_weighting = 0.25
 
-    print('Gas baseline: {0} Ohms, humidity baseline: {1:.2f} %RH\n'.format(
-        gas_baseline,
-        hum_baseline))
+    print(f'Gas baseline: {gas_baseline} Ohms, humidity baseline: {hum_baseline:.2f} %RH\n')
 
     while True:
         if sensor.get_sensor_data() and sensor.data.heat_stable:
@@ -98,10 +96,7 @@ try:
             # Calculate air_quality_score.
             air_quality_score = hum_score + gas_score
 
-            print('Gas: {0:.2f} Ohms,humidity: {1:.2f} %RH,air quality: {2:.2f}'.format(
-                gas,
-                hum,
-                air_quality_score))
+            print(f'Gas: {gas:.2f} Ohms,humidity: {hum:.2f} %RH,air quality: {air_quality_score:.2f}')
 
             time.sleep(1)
 
