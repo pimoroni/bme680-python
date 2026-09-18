@@ -1,11 +1,15 @@
 """BME680 Temperature, Pressure, Humidity & Gas Sensor."""
 import math
 import time
+from importlib.metadata import PackageNotFoundError, version
 
 from . import constants
 from .constants import BME680Data, lookupTable1, lookupTable2
 
-__version__ = '2.0.1'
+try:
+    __version__ = version("bme680")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 
 
 # Export constants to global namespace
